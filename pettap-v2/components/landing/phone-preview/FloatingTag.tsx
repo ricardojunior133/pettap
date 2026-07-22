@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, MotionValue } from "framer-motion";
+import { motion, MotionValue, useReducedMotion } from "framer-motion";
 
 interface FloatingTagProps {
   x: MotionValue<number>;
@@ -16,13 +16,15 @@ export default function FloatingTag({
   rotate,
   scale,
 }: FloatingTagProps) {
+  const reducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      className="absolute left-[8%] top-1/2 z-30 hidden -translate-y-1/2 lg:block"
-      animate={{
+      className="absolute left-[18%] top-1/2 z-30 hidden -translate-y-1/2 lg:block"
+      animate={reducedMotion ? undefined : {
         y: [0, -8, 0],
       }}
-      transition={{
+      transition={reducedMotion ? undefined : {
         duration: 3.5,
         repeat: Infinity,
         ease: "easeInOut",
@@ -38,10 +40,10 @@ export default function FloatingTag({
         <div className="absolute inset-0 scale-110 rounded-full bg-sky-400/10 blur-2xl" />
 
         <motion.div
-          animate={{
+          animate={reducedMotion ? undefined : {
             rotateY: [0, 5, 0, -5, 0],
           }}
-          transition={{
+          transition={reducedMotion ? undefined : {
             duration: 6,
             repeat: Infinity,
             ease: "easeInOut",

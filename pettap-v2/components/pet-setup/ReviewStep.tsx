@@ -1,0 +1,11 @@
+import Image from "next/image";
+import { CheckCircle2, HeartPulse, ShieldCheck, type LucideIcon } from "lucide-react";
+
+import Card from "@/components/ui/Card";
+import type { PetSetup, PetSetupContent } from "@/lib/pet-setup";
+
+export default function ReviewStep({ setup, content, onFinish }: { setup: PetSetup; content: PetSetupContent["review"]; onFinish: () => void }) {
+  return <section aria-labelledby="review-step"><p className="text-sm font-semibold uppercase tracking-[.16em] text-sky-700">Review</p><h1 id="review-step" className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{content.title}</h1><p className="mt-3 leading-7 text-muted-foreground">{content.description}</p><Card className="mt-8 overflow-hidden"><div className="flex items-center gap-4 bg-neutral-50 p-5"><div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-neutral-200"><Image src={setup.photo} alt={setup.name} fill sizes="64px" className="object-cover" /></div><div><h2 className="text-xl font-semibold text-foreground">{setup.name}</h2><p className="mt-1 text-sm text-muted-foreground">{setup.breed} · {setup.species}</p></div></div><div className="grid gap-px bg-neutral-100 sm:grid-cols-2"><ReviewItem icon={ShieldCheck} label="PetTag" value={setup.tagStatus} /><ReviewItem icon={HeartPulse} label="Health" value={setup.health.allergies} /><ReviewItem icon={CheckCircle2} label="Primary contact" value={setup.contacts[0]?.name ?? "Not provided"} /><ReviewItem icon={CheckCircle2} label="Emergency contacts" value={`${setup.contacts.length} ready`} /></div></Card><button type="button" onClick={onFinish} className="mt-6 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#111111] px-6 text-base font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,.14)] transition-all hover:-translate-y-0.5 hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600">{content.finish}</button></section>;
+}
+
+function ReviewItem({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) { return <div className="bg-white p-5"><Icon className="h-5 w-5 text-sky-700" /><p className="mt-3 text-sm font-medium text-muted-foreground">{label}</p><p className="mt-1 font-semibold text-foreground">{value}</p></div>; }

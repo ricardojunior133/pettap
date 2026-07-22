@@ -1,0 +1,5 @@
+import { ArrowRight, ShieldCheck } from "lucide-react";
+
+export default function ActivationWelcome({ title, description, action, onStart }: { title: string; description: string; action: string; onStart: () => void }) {
+  return <div className="mx-auto max-w-xl py-8 text-center sm:py-14"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-sky-50 text-sky-700 shadow-sm"><ShieldCheck className="h-8 w-8" /></div><p className="mt-8 text-sm font-semibold uppercase tracking-[0.16em] text-sky-700">PetTap activation</p><h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{title}</h1><p className="mx-auto mt-5 max-w-md text-lg leading-8 text-muted-foreground">{description}</p><button type="button" onClick={onStart} className="mt-9 inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#111111] px-6 text-base font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,.14)] transition-all hover:-translate-y-0.5 hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600 active:translate-y-0">{action}<ArrowRight className="h-5 w-5" /></button></div>;
+}

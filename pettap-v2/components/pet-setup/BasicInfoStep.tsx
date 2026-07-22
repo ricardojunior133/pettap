@@ -1,0 +1,8 @@
+import type { PetSetup, PetSetupContent } from "@/lib/pet-setup";
+
+type BasicFields = Pick<PetSetup, "name" | "species" | "breed" | "gender" | "birthDate" | "weight" | "colour" | "microchip">;
+
+export default function BasicInfoStep({ setup, content, onChange, onContinue }: { setup: BasicFields; content: PetSetupContent["basic"]; onChange: (field: keyof BasicFields, value: string) => void; onContinue: () => void }) {
+  const fields = (Object.keys(content.labels) as (keyof BasicFields)[]).map((key) => ({ key, label: content.labels[key], value: setup[key] }));
+  return <section aria-labelledby="basic-step"><p className="text-sm font-semibold uppercase tracking-[.16em] text-sky-700">Basic info</p><h1 id="basic-step" className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{content.title}</h1><p className="mt-3 leading-7 text-muted-foreground">{content.description}</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{fields.map((field) => <label key={field.key} className="block rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm"><span className="text-sm font-semibold text-foreground">{field.label}</span><input value={field.value} onChange={(event) => onChange(field.key, event.target.value)} className="mt-2 w-full bg-transparent text-base text-muted-foreground outline-none placeholder:text-neutral-400 focus:text-foreground" /></label>)}</div><button type="button" onClick={onContinue} className="mt-8 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#111111] px-6 font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,.14)] transition-all hover:-translate-y-0.5 hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600">{content.continue}</button></section>;
+}

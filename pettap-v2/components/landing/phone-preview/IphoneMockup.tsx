@@ -1,27 +1,32 @@
 "use client";
 
 import { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface IphoneMockupProps {
   children: ReactNode;
+  staticFrame?: boolean;
 }
 
 export default function IphoneMockup({
   children,
+  staticFrame = false,
 }: IphoneMockupProps) {
+  const reducedMotion = useReducedMotion();
+  const shouldAnimate = !staticFrame && !reducedMotion;
+
   return (
     <motion.div
       className="relative"
-      animate={{
+      animate={shouldAnimate ? {
         y: [0, -6, 0],
         rotateZ: [0, 0.35, 0, -0.35, 0],
-      }}
-      transition={{
+      } : undefined}
+      transition={shouldAnimate ? {
         duration: 8,
         repeat: Infinity,
         ease: "easeInOut",
-      }}
+      } : undefined}
     >
       {/* Ambient Glow */}
 
@@ -51,28 +56,28 @@ export default function IphoneMockup({
 
           <motion.div
             className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/15 via-white/5 to-transparent"
-            animate={{
+            animate={shouldAnimate ? {
               opacity: [0.08, 0.18, 0.08],
-            }}
-            transition={{
+            } : undefined}
+            transition={shouldAnimate ? {
               duration: 6,
               repeat: Infinity,
               ease: "easeInOut",
-            }}
+            } : undefined}
           />
 
           {/* Moving Reflection */}
 
           <motion.div
             className="pointer-events-none absolute -left-32 top-0 h-full w-20 rotate-12 bg-white/10 blur-2xl"
-            animate={{
+            animate={shouldAnimate ? {
               x: [-80, 420],
-            }}
-            transition={{
+            } : undefined}
+            transition={shouldAnimate ? {
               duration: 6,
               repeat: Infinity,
               ease: "linear",
-            }}
+            } : undefined}
           />
 
           {/* Bottom Vignette */}

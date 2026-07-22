@@ -1,132 +1,27 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 
 import Container from "@/components/layout/Container";
-import { FadeUp } from "@/components/animations";
-import { Button } from "@/components/ui/button";
 
 export default function CTA() {
   return (
-    <section className="relative overflow-hidden py-36">
-
-      {/* Background */}
-
-      <div className="absolute inset-0 -z-10">
-
-        <div className="absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/10 blur-[180px]" />
-
-        <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-violet-500/10 blur-[160px]" />
-
-      </div>
-
+    <section className="bg-white py-24 sm:py-32">
       <Container>
-
-        <FadeUp>
-
-          <div
-            className="
-              relative
-              overflow-hidden
-              rounded-[40px]
-              border
-              border-neutral-200/70
-              bg-white/80
-              px-8
-              py-20
-              text-center
-              shadow-[0_30px_80px_rgba(0,0,0,.08)]
-              backdrop-blur-xl
-              lg:px-20
-            "
-          >
-            {/* Glow */}
-
-            <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-transparent to-violet-50 opacity-80" />
-
-            <div className="relative">
-
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-sky-700">
-
-                <Sparkles className="h-4 w-4" />
-
-                Ready to Start?
-
-              </div>
-
-              <h2 className="mx-auto mt-8 max-w-4xl font-heading text-5xl font-bold tracking-tight text-foreground lg:text-7xl">
-
-                Give your best friend
-                <br />
-                a smarter way home.
-
-              </h2>
-
-              <p className="mx-auto mt-8 max-w-2xl text-xl leading-9 text-muted-foreground">
-
-                Create a personalised PetTap in just a few minutes and
-                help your pet get home faster if they ever become lost.
-
-              </p>
-
-              <div className="mt-12 flex flex-wrap justify-center gap-5">
-
-                <Link href="/shop">
-
-                  <Button
-                    size="lg"
-                    className="h-14 rounded-2xl px-10 text-base"
-                  >
-                    Create My PetTap
-
-                    <ArrowRight className="ml-2 h-5 w-5" />
-
-                  </Button>
-
-                </Link>
-
-                <Link href="#how-it-works">
-
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="h-14 rounded-2xl px-10 text-base"
-                  >
-                    Learn More
-                  </Button>
-
-                </Link>
-
-              </div>
-
-              <div className="mt-14 flex flex-wrap items-center justify-center gap-8 text-sm font-medium text-muted-foreground">
-
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-sky-600" />
-                  No Subscription
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-sky-600" />
-                  Works with iPhone & Android
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-sky-600" />
-                  Waterproof
-                </div>
-
-              </div>
-
-            </div>
-
+        <div className="overflow-hidden rounded-[36px] bg-neutral-950 px-7 py-16 text-center text-white shadow-[0_24px_60px_rgba(17,17,17,0.16)] sm:px-12 sm:py-20">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">A calmer way to protect them</p>
+          <h2 className="mx-auto mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">Give them a safer way home.</h2>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-white/65 sm:text-lg">Start with PetTap Essential, or make a PetTag that feels entirely theirs in the Studio.</p>
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <Link href="/checkout?product=essential" className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-6 text-sm font-semibold text-neutral-950 transition hover:-translate-y-0.5 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/25">Buy PetTap Essential <ArrowRight className="size-4" aria-hidden="true" /></Link>
+            <Link href="/studio" className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/20 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/25">Explore the Studio</Link>
           </div>
-
-        </FadeUp>
-
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-white/60">
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4" aria-hidden="true" />NFC enabled</span>
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4" aria-hidden="true" />No subscription</span>
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4" aria-hidden="true" />No app required</span>
+          </div>
+        </div>
       </Container>
-
     </section>
   );
 }

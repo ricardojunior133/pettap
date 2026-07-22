@@ -24,17 +24,17 @@ export default function HeroContent() {
       </h1>
 
       <p className="mt-8 max-w-lg text-lg leading-8 text-muted-foreground">
-        PetTap helps reunite lost pets with their families using NFC technology
-        and QR codes. Fast, secure and subscription free.
+        A beautifully made NFC tag opens your pet&apos;s profile with a simple tap,
+        helping the right person reach you when it matters most.
       </p>
 
       <div className="mt-10 flex flex-wrap gap-4">
-        <Link href="/shop">
+        <Link href="/studio">
           <Button
             size="lg"
             className="rounded-xl px-8"
           >
-            Design Your Tag
+            Personalise Your PetTap
           </Button>
         </Link>
 
@@ -58,12 +58,12 @@ export default function HeroContent() {
 
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-full bg-primary" />
-          <span className="text-sm font-medium">QR Backup</span>
+          <span className="text-sm font-medium">No app needed</span>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-full bg-primary" />
-          <span className="text-sm font-medium">Waterproof</span>
+          <span className="text-sm font-medium">Made for everyday walks</span>
         </div>
 
         <div className="flex items-center gap-3">

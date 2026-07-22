@@ -1,108 +1,148 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Float } from "@/components/animations";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-export default function HeroVisual() {
+import IphoneMockup from "@/components/landing/phone-preview/IphoneMockup";
+import DetectingScreen from "@/components/landing/phone-preview/screens/DetectingScreen";
+import PetProfile from "@/components/landing/phone-preview/screens/PetProfile";
+import SplashScreen from "@/components/landing/phone-preview/screens/SplashScreen";
+
+type HeroStage = "ready" | "reading" | "profile";
+
+interface HeroVisualProps {
+  compact?: boolean;
+}
+
+export default function HeroVisual({ compact = false }: HeroVisualProps) {
+  const reducedMotion = useReducedMotion();
+  const [stage, setStage] = useState<HeroStage>("ready");
+  const visibleStage: HeroStage = reducedMotion ? "profile" : stage;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      return;
+    }
+
+    const playSequence = () => {
+      setStage("ready");
+      window.setTimeout(() => setStage("reading"), 2600);
+      window.setTimeout(() => setStage("profile"), 4200);
+    };
+
+    playSequence();
+    const interval = window.setInterval(playSequence, 9400);
+
+    return () => window.clearInterval(interval);
+  }, [reducedMotion]);
+
+  const isReading = visibleStage === "reading";
+  const phoneOffset = isReading ? (compact ? -20 : -54) : 0;
+
   return (
-    <div className="relative h-[820px] w-[900px]">
-
-      {/* Background Glow */}
+    <div
+      className={`relative mx-auto overflow-visible ${
+        compact ? "h-[430px] w-full max-w-[520px]" : "h-[820px] w-[900px]"
+      }`}
+    >
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[760px] w-[760px] rounded-full bg-violet-500/15 blur-[180px]" />
+        <div className="h-[72%] w-[72%] rounded-full bg-sky-300/10 blur-[110px]" />
       </div>
 
-      {/* Ground Shadow */}
-      <div className="absolute bottom-2 left-[58%] z-10 -translate-x-1/2">
-        <div className="h-10 w-[540px] rounded-full bg-black/15 blur-3xl" />
+      <div
+        className={`absolute bottom-[8%] left-1/2 h-8 w-[64%] -translate-x-1/2 rounded-full bg-black/15 blur-2xl ${
+          compact ? "opacity-70" : ""
+        }`}
+      />
+
+      <motion.div
+        className={`absolute z-10 ${compact ? "left-[17%] top-0 w-[66%]" : "left-[32%] top-[7%] w-[54%]"}`}
+        animate={reducedMotion ? undefined : { y: [0, -4, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Image
+          src="/images/hero/golden.png"
+          alt="Golden Retriever wearing a PetTap tag on its collar"
+          width={760}
+          height={1140}
+          priority
+          sizes={compact ? "(max-width: 1023px) 68vw" : "580px"}
+          className="h-auto w-full drop-shadow-[0_35px_70px_rgba(0,0,0,.2)]"
+        />
+      </motion.div>
+
+      <motion.div
+        className={`absolute z-30 ${compact ? "left-[18%] top-[24%] scale-[0.38] origin-top-left" : "left-[16%] top-[14%] scale-[0.66] origin-top-left"}`}
+        animate={
+          reducedMotion
+            ? undefined
+            : {
+                x: isReading ? [0, phoneOffset, phoneOffset + 2, phoneOffset] : phoneOffset,
+                y: isReading ? [0, 1, -1, 0] : [0, -2, 0],
+                rotateZ: isReading ? [0, -0.6, 0.5, 0] : [0, 0.3, 0],
+              }
+        }
+        transition={{
+          duration: isReading ? 1.35 : 4.8,
+          repeat: isReading ? 0 : Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        <IphoneMockup staticFrame>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={visibleStage}
+              className="h-full w-full"
+              initial={reducedMotion ? false : { opacity: 0, scale: 0.985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.015 }}
+              transition={{ duration: 0.38, ease: "easeOut" }}
+            >
+              {visibleStage === "ready" && <SplashScreen />}
+              {visibleStage === "reading" && <DetectingScreen />}
+              {visibleStage === "profile" && <PetProfile />}
+            </motion.div>
+          </AnimatePresence>
+        </IphoneMockup>
+      </motion.div>
+
+      <motion.div
+        aria-hidden="true"
+        className={`pointer-events-none absolute z-40 text-sky-500/70 ${
+          compact ? "left-[49%] top-[45%]" : "left-[48%] top-[46%]"
+        }`}
+        animate={reducedMotion ? { opacity: 0 } : { opacity: isReading ? [0, 1, 0.7, 0] : 0, scale: isReading ? [0.9, 1, 1.04, 1] : 0.9 }}
+        transition={{ duration: 1.3, ease: "easeInOut" }}
+      >
+        <svg width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <path d="M14 14a10 10 0 0 1 14 14" />
+          <path d="M9 9a17 17 0 0 1 24 24" />
+          <path d="M19 19a3 3 0 0 1 4 4" />
+        </svg>
+      </motion.div>
+
+      <div className={`absolute z-40 ${compact ? "bottom-[2%] left-[12%] w-[34%]" : "bottom-[2%] left-[27%] w-[30%]"}`}>
+        <Image
+          src="/images/hero/cat.png"
+          alt=""
+          width={260}
+          height={220}
+          loading="eager"
+          sizes={compact ? "120px" : "210px"}
+          className="h-auto w-full opacity-95 drop-shadow-[0_20px_35px_rgba(0,0,0,.16)]"
+        />
       </div>
 
-      {/* Golden */}
-<div className="absolute left-[35%] top-20 z-40 translate-x-[220px]">
-  <Float duration={8}>
-    <Image
-      src="/images/hero/golden.png"
-      alt="Golden Retriever"
-      width={980}
-      height={980}
-      priority
-      className="drop-shadow-[0_40px_90px_rgba(0,0,0,.25)]"
-    />
-  </Float>
-</div>
-
-      {/* Phone */}
-      <div className="absolute left-[40%] top-10 translate-x-[180px]">
-        <Float duration={6}>
-          <Image
-            src="/images/hero/phone.png"
-            alt="PetTap App"
-            width={430}
-            height={640}
-            priority
-            className="rotate-[10deg] drop-shadow-[0_40px_90px_rgba(0,0,0,.30)]"
-          />
-        </Float>
-      </div>
-
-      {/* Pug */}
-      <div className="absolute bottom-12 left-[20%] z-30">
-        <Float duration={7}>
-          <Image
-            src="/images/hero/pug.png"
-            alt="Pug"
-            width={150}
-            height={230}
-            priority
-            className="drop-shadow-[0_20px_40px_rgba(0,0,0,.20)]"
-          />
-        </Float>
-      </div>
-
-      {/* Cat */}
-      <div className="absolute bottom-8 left-[58%] z-30">
-        <Float duration={9}>
-          <Image
-            src="/images/hero/cat.png"
-            alt="British Shorthair"
-            width={250}
-            height={210}
-            priority
-            className="drop-shadow-[0_20px_40px_rgba(0,0,0,.20)]"
-          />
-        </Float>
-      </div>
-
-      {/* Reviews Card */}
-      <div className="absolute left-[46%] top-24 z-50 rounded-3xl border border-white/60 bg-white/90 p-5 shadow-2xl backdrop-blur-xl">
-        <p className="text-lg text-yellow-500">★★★★★</p>
-
-        <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-gray-500">
-          Trusted by
-        </p>
-
-        <p className="text-3xl font-bold text-slate-900">
-          5,000+
-        </p>
-
-        <p className="text-sm text-gray-500">
-          Pet Parents
-        </p>
-      </div>
-
-      {/* Subscription Card */}
-      <div className="absolute28 right-0 z-50 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-2xl backdrop-blur-xl">
-        <p className="text-4xl font-bold text-primary">
-          100%
-        </p>
-
-        <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-          Subscription
-        </p>
-
-        <p className="font-semibold">
-          Free
-        </p>
+      <div className={`absolute z-40 ${compact ? "bottom-[2%] right-[1%] w-[23%]" : "bottom-[2%] right-[1%] w-[24%]"}`}>
+        <Image
+          src="/images/hero/pug.png"
+          alt=""
+          width={180}
+          height={270}
+          sizes={compact ? "88px" : "150px"}
+          className="h-auto w-full opacity-95 drop-shadow-[0_20px_35px_rgba(0,0,0,.16)]"
+        />
       </div>
     </div>
   );

@@ -1,16 +1,19 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
 import FloatingTag from "./FloatingTag";
 import IphoneMockup from "./IphoneMockup";
 import PhoneScreen from "./PhoneScreen";
 import NFCPulse from "./NFCPulse";
 import { timeline } from "./timeline";
+import PetProfile from "./screens/PetProfile";
 
 export default function PhoneExperience() {
   const ref = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -71,18 +74,40 @@ export default function PhoneExperience() {
     [60, 0]
   );
 
+  if (reducedMotion) {
+    return (
+      <section className="relative mx-auto mt-14 flex min-h-[620px] max-w-5xl items-center justify-center overflow-hidden rounded-[40px] border border-neutral-200 bg-neutral-50 px-6 py-16 lg:mt-20">
+        <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-300/10 blur-[100px]" />
+        <div className="relative z-10 mr-[-54px] hidden w-32 lg:block">
+          <Image
+            src="/images/tag/black.png"
+            alt="PetTap tag"
+            width={180}
+            height={180}
+            className="drop-shadow-[0_24px_32px_rgba(0,0,0,.24)]"
+          />
+        </div>
+        <div className="relative z-20 scale-[0.72] origin-center sm:scale-[0.82]">
+          <IphoneMockup staticFrame>
+            <PetProfile />
+          </IphoneMockup>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       ref={ref}
-      className="relative h-[350vh]"
+      className="relative h-[300vh]"
     >
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
 
         {/* Background Glow */}
         <motion.div
-          className="absolute -left-32 top-1/2 h-[520px] w-[520px] rounded-full bg-sky-400/10 blur-[150px]"
+          className="absolute -left-32 top-1/2 h-[520px] w-[520px] rounded-full bg-sky-400/[0.07] blur-[150px]"
           animate={{
-            opacity: [0.15, 0.45, 0.15],
+            opacity: [0.12, 0.26, 0.12],
             scale: [1, 1.15, 1],
           }}
           transition={{
@@ -93,9 +118,9 @@ export default function PhoneExperience() {
         />
 
         <motion.div
-          className="absolute right-[-120px] top-1/3 h-[420px] w-[420px] rounded-full bg-cyan-300/10 blur-[140px]"
+          className="absolute right-[-120px] top-1/3 h-[420px] w-[420px] rounded-full bg-cyan-300/[0.06] blur-[140px]"
           animate={{
-            opacity: [0.1, 0.3, 0.1],
+            opacity: [0.08, 0.2, 0.08],
             scale: [1, 1.08, 1],
           }}
           transition={{
@@ -124,15 +149,6 @@ export default function PhoneExperience() {
           style={{
             y: phoneY,
             scale: phoneScale,
-          }}
-          animate={{
-            y: [0, -6, 0],
-            rotateZ: [0, 0.35, 0, -0.35, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
           }}
         >
           <IphoneMockup>

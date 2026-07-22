@@ -1,0 +1,9 @@
+import { AlertTriangle } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+
+import type { LostModeData } from "@/lib/lost-mode";
+
+export default function LostModeModal({ data, onCancel, onConfirm }: { data: LostModeData; onCancel: () => void; onConfirm: () => void }) {
+  const reduceMotion = useReducedMotion();
+  return <div role="dialog" aria-modal="true" aria-labelledby="lost-mode-modal-title" className="fixed inset-0 z-[70] flex items-end bg-black/35 p-4 sm:items-center sm:justify-center" onMouseDown={onCancel}><motion.div initial={reduceMotion ? false : { opacity: 0, y: 12, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .2 }} className="w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl" onMouseDown={(event) => event.stopPropagation()}><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-700"><AlertTriangle className="h-6 w-6" /></div><h2 id="lost-mode-modal-title" className="mt-6 text-2xl font-semibold tracking-tight text-foreground">{data.confirmation.title}</h2><p className="mt-3 leading-7 text-muted-foreground">{data.confirmation.description}</p><div className="mt-8 grid gap-3 sm:grid-cols-2"><button type="button" onClick={onCancel} className="min-h-13 rounded-2xl border border-neutral-200 px-5 font-semibold text-foreground transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">{data.confirmation.cancel}</button><button type="button" onClick={onConfirm} className="min-h-13 rounded-2xl bg-rose-600 px-5 font-semibold text-white shadow-[0_10px_24px_rgba(225,29,72,.2)] transition-colors hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">{data.confirmation.confirm}</button></div></motion.div></div>;
+}

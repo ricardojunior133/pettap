@@ -1,0 +1,9 @@
+import { CheckCircle2, Radio } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+
+import type { ActivationContent } from "@/lib/activation";
+
+export default function NFCWaiting({ content, detected, onContinue }: { content: ActivationContent["nfc"]; detected: boolean; onContinue: () => void }) {
+  const reduceMotion = useReducedMotion();
+  return <section aria-live="polite" className="mx-auto max-w-xl py-6 text-center sm:py-12"><div className="relative mx-auto flex h-40 w-40 items-center justify-center"><motion.div animate={detected || reduceMotion ? undefined : { scale: [1, 1.12, 1], opacity: [.25, .55, .25] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 rounded-full bg-sky-200" /><div className="relative flex h-24 w-24 items-center justify-center rounded-[30px] bg-[#111111] text-white shadow-[0_18px_36px_rgba(0,0,0,.18)]">{detected ? <CheckCircle2 className="h-10 w-10 text-emerald-300" /> : <Radio className="h-10 w-10" />}</div></div><p className="mt-8 text-sm font-semibold uppercase tracking-[0.16em] text-sky-700">{detected ? "Tag detected" : "NFC activation"}</p><h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{detected ? content.detected : content.title}</h1><p className="mx-auto mt-3 max-w-md leading-7 text-muted-foreground">{detected ? content.detail : content.waiting}</p>{detected && <button type="button" onClick={onContinue} className="mt-8 min-h-14 rounded-2xl bg-[#111111] px-6 font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,.14)] transition-all hover:-translate-y-0.5 hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-600">{content.action}</button>}<p className="mt-8 text-sm text-muted-foreground">Demo mode simulates NFC detection; no tag data is read.</p></section>;
+}

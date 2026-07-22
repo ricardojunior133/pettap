@@ -22,7 +22,6 @@ export const metadata: Metadata = {
   keywords: [
     "NFC Pet Tag",
     "Smart Pet Tag",
-    "QR Pet Tag",
     "Dog Tag",
     "Cat Tag",
     "Lost Pet",
@@ -41,6 +40,10 @@ export const metadata: Metadata = {
 
   applicationName: "PetTap",
 
+  alternates: {
+    canonical: "/",
+  },
+
   openGraph: {
     title: "PetTap",
 
@@ -53,14 +56,6 @@ export const metadata: Metadata = {
 
     siteName: "PetTap",
 
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "PetTap",
-      },
-    ],
   },
 
   twitter: {
@@ -71,13 +66,11 @@ export const metadata: Metadata = {
     description:
       "Beautiful NFC pet tags that help lost pets find their way home.",
 
-    images: ["/og-image.jpg"],
   },
 
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
   },
 };
 

@@ -4,10 +4,6 @@ import { motion } from "framer-motion";
 import {
   ChevronRight,
   LucideIcon,
-  Phone,
-  MessageCircle,
-  Navigation,
-  HeartPulse,
 } from "lucide-react";
 
 interface Props {

@@ -3,7 +3,7 @@ import StorySection from "./StorySection";
 
 export default function HowItWorks() {
   return (
-    <section className="bg-white py-32">
+    <section id="how-it-works" className="scroll-mt-24 bg-white py-24 sm:py-32">
       <Container>
         <div className="mx-auto mb-24 max-w-3xl text-center">
           <span className="text-sm font-semibold uppercase tracking-[0.35em] text-primary">
@@ -15,7 +15,7 @@ export default function HowItWorks() {
           </h2>
 
           <p className="mt-8 text-xl leading-9 text-slate-600">
-            From the moment your pet goes missing until they're safely back in
+            From the moment your pet goes missing until they&apos;re safely back in
             your arms, PetTap makes every second count.
           </p>
         </div>
@@ -31,7 +31,7 @@ export default function HowItWorks() {
           reverse
           eyebrow="02 • TAP"
           title="One tap. No apps. No delays."
-          description="Anyone with a modern smartphone can instantly access your pet's profile using NFC."
+          description="Anyone with a modern smartphone can instantly access your pet&apos;s profile using NFC."
           image="/images/story/tap.png"
         />
 
@@ -46,7 +46,7 @@ export default function HowItWorks() {
           reverse
           eyebrow="04 • HOME"
           title="Back where they belong."
-          description="The best notification you'll ever receive is knowing your best friend is coming home."
+          description="The best notification you&apos;ll ever receive is knowing your best friend is coming home."
           image="/images/story/home.png"
         />
       </Container>
