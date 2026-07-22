@@ -1,0 +1,13 @@
+import Link from "next/link";
+import { CircleHelp, Home, PawPrint, Settings } from "lucide-react";
+import type { ReactNode } from "react";
+
+const navigation = [{ href: "/dashboard", label: "Overview", icon: Home }, { href: "/dashboard/pets", label: "My pets", icon: PawPrint }, { href: "/dashboard/settings", label: "Settings", icon: Settings }];
+
+export function AppShell({ children }: { children: ReactNode }) {
+  return <div className="min-h-screen bg-neutral-50 text-neutral-950"><aside className="fixed inset-y-0 hidden w-64 border-r border-black/[0.06] bg-white p-5 lg:block"><Link href="/dashboard" className="text-xl font-semibold tracking-[-0.05em]">PetTap</Link><nav className="mt-10 space-y-1" aria-label="Application navigation">{navigation.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950"><Icon className="size-4" aria-hidden="true" />{label}</Link>)}</nav><Link href="/help" className="absolute bottom-6 flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950"><CircleHelp className="size-4" aria-hidden="true" />Help</Link></aside><div className="lg:pl-64"><header className="flex min-h-16 items-center justify-between border-b border-black/[0.06] bg-white px-5 sm:px-8"><Link href="/dashboard" className="text-lg font-semibold tracking-[-0.04em] lg:hidden">PetTap</Link><p className="ml-auto text-sm text-neutral-500">Private platform preview</p></header><main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">{children}</main></div></div>;
+}
+
+export function PageHeader({ eyebrow, title, description }: { eyebrow?: string; title: string; description: string }) { return <header className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{eyebrow ?? "PetTap platform"}</p><h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl">{title}</h1><p className="mt-4 text-base leading-7 text-neutral-600 sm:text-lg">{description}</p></header>; }
+
+export function EmptyState({ title, description }: { title: string; description: string }) { return <section className="mt-10 rounded-[28px] border border-dashed border-black/[0.12] bg-white p-8 text-center sm:p-12"><PawPrint className="mx-auto size-6 text-neutral-400" aria-hidden="true" /><h2 className="mt-4 text-xl font-semibold tracking-[-0.03em]">{title}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-neutral-600">{description}</p></section>; }

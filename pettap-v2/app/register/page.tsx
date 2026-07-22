@@ -1,0 +1,2 @@
+import PrivateRoutePage from "@/components/app/PrivateRoutePage";
+export default function RegisterPage() { return <PrivateRoutePage title="Create your PetTap account" description="Account registration is designed around privacy, clear consent and pet safety." emptyTitle="Registration is not public yet" emptyDescription="Secure authentication will be connected before account creation is enabled." />; }

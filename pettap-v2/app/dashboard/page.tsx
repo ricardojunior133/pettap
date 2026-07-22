@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-import Dashboard from "@/components/dashboard/Dashboard";
-import { getCurrentOwnerDashboard } from "@/features/owner";
+import { EmptyState, PageHeader } from "@/components/app/AppShell";
 
 export const metadata: Metadata = {
   title: "Owner dashboard",
@@ -10,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
-  return <Dashboard data={getCurrentOwnerDashboard()} />;
+  return <><PageHeader title="Your PetTap home" description="Manage your pets, tags and safety information from one private place." /><EmptyState title="Your account is ready for connection" description="Pets and activity will appear here once secure account and data services are connected." /></>;
 }

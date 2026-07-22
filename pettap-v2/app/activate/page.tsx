@@ -1,0 +1,2 @@
+import PrivateRoutePage from "@/components/app/PrivateRoutePage";
+export default function ActivatePage() { return <PrivateRoutePage title="Activate your PetTap" description="A secure NFC activation flow will associate a genuine tag with its owner's account." emptyTitle="Activation is protected" emptyDescription="NFC validation and account association will be enabled with the secure platform services." />; }
