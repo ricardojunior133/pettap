@@ -13,3 +13,6 @@ export interface Pet { id: string; ownerId: string; name: string; species: PetSp
 export interface LostReport { id: string; petId: string; status: LostReportStatus; lastSeenAt: string; lastSeenLocation?: string; notes?: string; createdAt: string; resolvedAt?: string; }
 export interface Activity { id: string; ownerId: string; petId?: string; type: ActivityType; occurredAt: string; metadata?: Record<string, string>; }
 export interface AuditLog { id: string; actorId: string; action: string; targetType: string; targetId: string; occurredAt: string; metadata?: Record<string, string>; }
+export interface Account { id: string; ownerId: string; locale?: string; theme: "light" | "dark" | "system"; createdAt: string; }
+export interface TagActivation { id: string; tagId: string; ownerId: string; petId?: string; status: "pending" | "validated" | "awaiting_backend" | "completed" | "failed"; createdAt: string; }
+export interface PublicPetProfile { publicId: string; petName: string; species: PetSpecies; breed?: string; photoUrl?: string; medicalAlert?: string; contactActionsEnabled: boolean; locationSharingEnabled: boolean; updatedAt: string; }

@@ -13,6 +13,7 @@ The public product remains the Coming Soon website. The application routes are p
 - `schemas/platform.ts`: Zod validation contracts used by future forms and API boundaries.
 - `features/`: future service-facing feature modules.
 - `lib/`: presentation-independent utilities and integrations.
+- `services/contracts.ts`: backend integration interfaces; no production mock adapter is selected.
 
 ## Routing and access
 
