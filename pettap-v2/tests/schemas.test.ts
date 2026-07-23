@@ -1,0 +1,3 @@
+import { describe, expect, it } from "vitest";
+import { emergencyContactSchema, tagActivationSchema } from "@/schemas/platform";
+describe("platform validation", () => { it("accepts an NFC identifier", () => expect(tagActivationSchema.parse({ tagIdentifier: "PTA7K92X" }).tagIdentifier).toBe("PTA7K92X")); it("rejects unsafe tag identifiers", () => expect(() => tagActivationSchema.parse({ tagIdentifier: "tag!" })).toThrow()); it("requires a reachable emergency contact", () => expect(() => emergencyContactSchema.parse({ name: "A", relationship: "Owner", phone: "", isPrimary: true })).toThrow()); });

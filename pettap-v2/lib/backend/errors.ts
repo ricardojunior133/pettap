@@ -1,0 +1,2 @@
+export class BackendError extends Error { constructor(public readonly code: "UNAUTHORIZED" | "FORBIDDEN" | "VALIDATION" | "CONFLICT" | "NOT_FOUND" | "STORAGE" | "DATABASE" | "UNEXPECTED", message: string) { super(message); } }
+export const backendError = { unauthorized: () => new BackendError("UNAUTHORIZED", "Sign in is required."), forbidden: () => new BackendError("FORBIDDEN", "You do not have access to this resource."), unavailable: () => new BackendError("DATABASE", "The PetTap service is not configured.") };
