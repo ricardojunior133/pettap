@@ -1,2 +1,21 @@
-import PrivateRoutePage from "@/components/app/PrivateRoutePage";
-export default function LoginPage() { return <PrivateRoutePage title="Welcome back" description="PetTap account access will be protected by a dedicated authentication service." emptyTitle="Sign in is not enabled" emptyDescription="No credentials are collected until secure authentication is connected." />; }
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { AuthForm } from "@/components/auth/AuthForm";
+import { getCurrentUser } from "@/lib/backend/auth/get-current-user";
+
+export default async function LoginPage() {
+  if (await getCurrentUser()) redirect("/admin/event-demo");
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-5 py-12">
+      <section className="w-full max-w-md rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_16px_50px_rgba(0,0,0,0.06)] sm:p-9">
+        <Link className="text-xl font-semibold tracking-[-0.05em] text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950" href="/">PetTap</Link>
+        <p className="mt-9 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Event Demo administration</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-neutral-950">Welcome back</h1>
+        <p className="mt-3 text-sm leading-6 text-neutral-600">Sign in to access the PetTap Event Demo console.</p>
+        <AuthForm mode="login" />
+      </section>
+    </main>
+  );
+}

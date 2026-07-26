@@ -1,34 +1,85 @@
 {
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./*"]
-    }
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
-  ],
-  "exclude": ["node_modules"]
+    "compilerOptions":  {
+                            "target":  "ES2017",
+                            "lib":  [
+                                        "dom",
+                                        "dom.iterable",
+                                        "esnext"
+                                    ],
+                            "strict":  true,
+                            "noEmit":  true,
+                            "esModuleInterop":  true,
+                            "module":  "esnext",
+                            "moduleResolution":  "bundler",
+                            "resolveJsonModule":  true,
+                            "isolatedModules":  true,
+                            "jsx":  "react-jsx",
+                            "incremental":  true,
+                            "plugins":  [
+                                            {
+                                                "name":  "next"
+                                            }
+                                        ],
+                            "paths":  {
+                                          "@/*":  [
+                                                      "./*"
+                                                  ]
+                                      },
+                            "skipLibCheck":  true,
+                            "allowJs":  true
+                        },
+    "include":  [
+                    "next-env.d.ts",
+                    "app/layout.tsx",
+                    "app/page.tsx",
+                    "app/event/**/*.ts",
+                    "app/event/**/*.tsx",
+                    "app/admin/event-demo/**/*.ts",
+                    "app/admin/event-demo/**/*.tsx",
+                    "app/api/admin/event-demo/**/*.ts",
+                    "components/coming-soon/PremiumComingSoon.tsx",
+                    "components/event-demo/**/*.ts",
+                    "components/event-demo/**/*.tsx",
+                    "components/ui/button.tsx",
+                    "components/ui/Card.tsx",
+                    "features/event-demo/**/*.ts",
+                    "features/event-demo/**/*.tsx",
+                    "features/admin/constants/access.ts",
+                    "features/admin/types/admin.ts",
+                    "features/admin/repositories/admin-repository.ts",
+                    "features/admin/services/admin-authorization-service.ts",
+                    "features/admin/services/admin-audit-service.ts",
+                    "features/owner/repositories/owner-repository.ts",
+                    "features/owner/services/profile-service.ts",
+                    "lib/auth/require-admin.ts",
+                    "lib/backend/db.ts",
+                    "lib/backend/env.ts",
+                    "lib/backend/public-env.ts",
+                    "lib/backend/auth/get-current-user.ts",
+                    "lib/backend/supabase/server.ts",
+                    "lib/backend/supabase/proxy.ts",
+                    "lib/security/rate-limit.ts",
+                    "lib/security/same-origin.ts",
+                    "lib/utils.ts",
+                    "db/schema/admin.ts",
+                    "db/schema/core.ts",
+                    "db/schema/event-demo.ts",
+                    "db/schema/index.ts",
+                    "proxy.ts",
+                    "scripts/event-demo-create-tag.ts",
+                    "tests/event-demo-*.test.ts",
+                    "tests/server-only.ts",
+                    "vitest.config.ts",
+                    "next.config.ts",
+                    ".next/types/**/*.ts",
+                    ".next/dev/types/**/*.ts",
+                    "app/login/page.tsx",
+                    "components/auth/AuthForm.tsx",
+                    "features/auth/actions/auth-actions.ts",
+                    "features/auth/schemas/auth.ts"
+                ],
+    "exclude":  [
+                    "node_modules",
+                    ".next"
+                ]
 }

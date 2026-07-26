@@ -1,89 +1,11 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+﻿import type { Metadata } from "next";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pettap.co.uk"),
-
-  title: {
-    default: "PetTap",
-    template: "%s | PetTap",
-  },
-
-  description:
-    "Beautiful NFC pet tags that help lost pets find their way home in seconds.",
-
-  keywords: [
-    "NFC Pet Tag",
-    "Smart Pet Tag",
-    "Dog Tag",
-    "Cat Tag",
-    "Lost Pet",
-    "PetTap",
-    "Pet Safety",
-    "Pet ID Tag",
-  ],
-
-  authors: [
-    {
-      name: "PetTap",
-    },
-  ],
-
-  creator: "PetTap",
-
-  applicationName: "PetTap",
-
-  alternates: {
-    canonical: "/",
-  },
-
-  openGraph: {
-    title: "PetTap",
-
-    description:
-      "Beautiful NFC pet tags that help reunite lost pets with their families.",
-
-    type: "website",
-
-    locale: "en_GB",
-
-    siteName: "PetTap",
-
-  },
-
-  twitter: {
-    card: "summary_large_image",
-
-    title: "PetTap",
-
-    description:
-      "Beautiful NFC pet tags that help lost pets find their way home.",
-
-  },
-
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-  },
+  title: "PetTap | Coming Soon",
+  description: "Smart NFC pet tags designed to help lost pets get home safely.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" className={inter.variable}>
-      <body className="min-h-screen bg-white text-[#111111] antialiased">
-        {children}
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="en"><body>{children}</body></html>;
 }

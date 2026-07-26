@@ -1,23 +1,9 @@
-import type { NextConfig } from "next";
 import path from "node:path";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
-  images: {
-    formats: ["image/avif", "image/webp"],
-    localPatterns: [
-      {
-        pathname: "/images/tag/**",
-        search: "?v=transparent-20260722",
-      },
-      {
-        pathname: "/**",
-        search: "",
-      },
-    ],
-  },
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
+  turbopack: { root: path.resolve(__dirname) },
 };
 
 export default nextConfig;
