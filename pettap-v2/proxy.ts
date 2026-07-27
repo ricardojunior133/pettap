@@ -33,6 +33,14 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  if (pathname === "/account" || pathname.startsWith("/account/")) {
+    const { response, user } = await updateSupabaseSession(request);
+    if (!user) return NextResponse.redirect(new URL("/login", request.url));
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+  }
+
   if (authPaths.has(pathname)) {
     const { response } = await updateSupabaseSession(request);
     return response;
