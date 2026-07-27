@@ -46,6 +46,9 @@ describe("Event Demo WebP storage payload", () => {
     const [path, payload, options] = upload.mock.calls[0] ?? [];
     expect(path).toBe(targetPath);
     expect(payload).toBeInstanceOf(ArrayBuffer);
+    expect(typeof SharedArrayBuffer === "undefined" || payload instanceof SharedArrayBuffer).toBe(false);
+    expect(Object.prototype.toString.call(payload)).toBe("[object ArrayBuffer]");
+    expect(payload.constructor.name).toBe("ArrayBuffer");
     expect(payload.byteLength).toBe(expected.byteLength);
     const uploadBytes = new Uint8Array(payload);
     expect([...uploadBytes.subarray(0, 12)]).toEqual([...expected.subarray(0, 12)]);
