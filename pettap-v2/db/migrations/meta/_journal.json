@@ -19,8 +19,71 @@
     {
       "idx": 2,
       "version": "7",
+      "when": 1784868900000,
+      "tag": "0002_pet_photo_storage_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
       "when": 1784962500000,
       "tag": "0003_commerce_and_operations_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785048900000,
+      "tag": "0004_admin_rbac_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785135300000,
+      "tag": "0005_admin_customer_pet_nfc_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785221700000,
+      "tag": "0006_admin_orders_production_fulfilment",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785308100000,
+      "tag": "0007_customer_privacy_controls",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785394500000,
+      "tag": "0008_guest_commerce_and_stripe_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785480900000,
+      "tag": "0009_stripe_payment_idempotency",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785567300000,
+      "tag": "0010_transactional_notification_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1785653700000,
+      "tag": "0011_event_demo_foundation",
       "breakpoints": true
     }
   ]
