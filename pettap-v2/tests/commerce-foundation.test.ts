@@ -49,11 +49,21 @@ describe("Commerce foundation schema", () => {
     expect(commerce).toContain("public.current_account_id()");
   });
 
-  it("preserves the canonical migration bytes recorded in the remote ledger", () => {
+  it("preserves the complete canonical migration history recorded in the remote ledger", () => {
     const migrationsDirectory = resolve(process.cwd(), "db/migrations");
     const canonical = {
+      "0000_chilly_nebula.sql": "672c645f6434b4ca45a803c491f75cbc86302e80a27ad647206041dc3f9f1cd9",
       "0001_enable_rls_and_account_isolation.sql": "7cf313a1001bc3213bfe240297d10988a9cabbe419db785befce63ceae085ee2",
+      "0002_pet_photo_storage_security.sql": "9ed322e3a6093a1dc0501cdc98834718f0b4cbae3fca5f98561c32396cae946a",
       "0003_commerce_and_operations_foundation.sql": "723c72ef63703f013600664bc238a96c4d41cb731c0f2de78cd2392c00a919bf",
+      "0004_admin_rbac_foundation.sql": "b0528d8d0a70fcf1a314ebb8643fa179d69166a2e19dbf235fd0cb24e74715f1",
+      "0005_admin_customer_pet_nfc_management.sql": "0f8d981e93a605d893460d20f5d3bf650f48a6fda658c25b20b23972a0fa6357",
+      "0006_admin_orders_production_fulfilment.sql": "5a21614fc886cffb6dba155f999eaff4ebd0c9cd6b7422bb524e27fdbcca0d27",
+      "0007_customer_privacy_controls.sql": "2db05219e14f834f47a52c98864a26ea83f707e67e1fa481efbea32c17dbcafd",
+      "0008_guest_commerce_and_stripe_foundation.sql": "1c42f862e44060ed9da65a496f638c69d7e93db88a004ef37041e214a2f1d8cb",
+      "0009_stripe_payment_idempotency.sql": "a08ec75273acc7640c3ffd0b456160c1fe22293113a4824965f92fe1e0ce17da",
+      "0010_transactional_notification_history.sql": "01cc156e04228c0ec69d0ab6529da674d03dc4af9f45929b6c51d3dadd3da0ac",
+      "0011_event_demo_foundation.sql": "48f67903848c35ce9b05ad71d7c3f1e263805abb94f2106d45edf0b701715480",
     };
 
     for (const [file, expectedHash] of Object.entries(canonical)) {
@@ -62,11 +72,10 @@ describe("Commerce foundation schema", () => {
     }
 
     const journal = JSON.parse(readFileSync(resolve(migrationsDirectory, "meta/_journal.json"), "utf8")) as { entries: Array<{ tag: string }> };
-    const names = readdirSync(migrationsDirectory).filter((name) => name.endsWith(".sql"));
-    expect(names.filter((name) => name === "0001_enable_rls_and_account_isolation.sql")).toHaveLength(1);
-    expect(names.filter((name) => name === "0003_commerce_and_operations_foundation.sql")).toHaveLength(1);
-    expect(journal.entries.filter((entry) => entry.tag === "0001_enable_rls_and_account_isolation")).toHaveLength(1);
-    expect(journal.entries.filter((entry) => entry.tag === "0003_commerce_and_operations_foundation")).toHaveLength(1);
+    const names = readdirSync(migrationsDirectory).filter((name) => name.endsWith(".sql")).sort();
+    expect(names).toEqual(Object.keys(canonical));
+    expect(journal.entries.map((entry) => entry.tag)).toEqual(Object.keys(canonical).map((name) => name.replace(/\.sql$/, "")));
+    expect(readdirSync(resolve(migrationsDirectory, "meta")).sort()).toEqual(["0000_snapshot.json", "_journal.json"]);
   });
 });
 
