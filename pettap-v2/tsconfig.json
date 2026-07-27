@@ -76,7 +76,16 @@
                     "app/login/page.tsx",
                     "components/auth/AuthForm.tsx",
                     "features/auth/actions/auth-actions.ts",
-                    "features/auth/schemas/auth.ts"
+                    "features/auth/schemas/auth.ts",
+                    "app/account/**/*.ts",
+                    "app/account/**/*.tsx",
+                    "features/account/**/*.ts",
+                    "features/account/**/*.tsx",
+                    "features/commerce/repositories/order-repository.ts",
+                    "features/commerce/services/commerce-account-service.ts",
+                    "features/commerce/services/order-read-service.ts",
+                    "features/commerce/types/commerce.ts",
+                    "db/schema/commerce.ts"
                 ],
     "exclude":  [
                     "node_modules",
