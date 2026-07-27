@@ -349,5 +349,3 @@ CREATE POLICY settings_delete_own_account ON public.settings
 -- There is no safe client ownership model for these placeholders yet. They remain
 -- RLS-protected with no grants or policies until a dedicated domain sprint defines
 -- their access model. In particular, audit logs are backend-only.
-
-

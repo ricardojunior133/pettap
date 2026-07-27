@@ -251,5 +251,3 @@ CREATE POLICY "orders_select_own" ON "orders" FOR SELECT TO authenticated USING 
 CREATE POLICY "order_items_select_own" ON "order_items" FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM "orders" WHERE "orders"."id" = "order_items"."order_id" AND "orders"."account_id" = (SELECT public.current_account_id())));
 CREATE POLICY "fulfilments_select_own" ON "fulfilments" FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM "orders" WHERE "orders"."id" = "fulfilments"."order_id" AND "orders"."account_id" = (SELECT public.current_account_id())));
 CREATE POLICY "order_status_history_select_own" ON "order_status_history" FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM "orders" WHERE "orders"."id" = "order_status_history"."order_id" AND "orders"."account_id" = (SELECT public.current_account_id())));
-
-
