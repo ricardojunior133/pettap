@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -46,6 +47,26 @@ describe("Commerce foundation schema", () => {
     expect(commerce).toContain("ENABLE ROW LEVEL SECURITY");
     expect(commerce).toContain("orders_select_own");
     expect(commerce).toContain("public.current_account_id()");
+  });
+
+  it("preserves the canonical migration bytes recorded in the remote ledger", () => {
+    const migrationsDirectory = resolve(process.cwd(), "db/migrations");
+    const canonical = {
+      "0001_enable_rls_and_account_isolation.sql": "7cf313a1001bc3213bfe240297d10988a9cabbe419db785befce63ceae085ee2",
+      "0003_commerce_and_operations_foundation.sql": "723c72ef63703f013600664bc238a96c4d41cb731c0f2de78cd2392c00a919bf",
+    };
+
+    for (const [file, expectedHash] of Object.entries(canonical)) {
+      const bytes = readFileSync(resolve(migrationsDirectory, file));
+      expect(createHash("sha256").update(bytes).digest("hex")).toBe(expectedHash);
+    }
+
+    const journal = JSON.parse(readFileSync(resolve(migrationsDirectory, "meta/_journal.json"), "utf8")) as { entries: Array<{ tag: string }> };
+    const names = readdirSync(migrationsDirectory).filter((name) => name.endsWith(".sql"));
+    expect(names.filter((name) => name === "0001_enable_rls_and_account_isolation.sql")).toHaveLength(1);
+    expect(names.filter((name) => name === "0003_commerce_and_operations_foundation.sql")).toHaveLength(1);
+    expect(journal.entries.filter((entry) => entry.tag === "0001_enable_rls_and_account_isolation")).toHaveLength(1);
+    expect(journal.entries.filter((entry) => entry.tag === "0003_commerce_and_operations_foundation")).toHaveLength(1);
   });
 });
 
