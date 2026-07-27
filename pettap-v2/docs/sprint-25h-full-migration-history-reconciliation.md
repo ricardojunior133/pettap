@@ -33,7 +33,9 @@ original file, and matches the remote Drizzle ledger hash and timestamp.
 | 0010 | `0010_transactional_notification_history.sql` | 1,579 | `01cc156e…` | MATCH |
 | 0011 | `0011_event_demo_foundation.sql` | 5,557 | `48f67903…` | MATCH |
 
-All SQL files are UTF-8 without BOM, LF terminated, and contain a final newline.
+All SQL files are UTF-8 without BOM and LF terminated. Eleven canonical files
+contain a final newline; `0009_stripe_payment_idempotency.sql` canonically does
+not, and is preserved exactly in that form.
 
 ## Files imported or replaced
 
