@@ -49,7 +49,8 @@ export class SupabaseEventDemoPhotoStorage implements EventDemoPhotoStorage {
     } catch {
       throw new EventDemoPhotoError("We couldn't read that image. Please choose a different photo.");
     }
-    const { error } = await adminStorageClient().storage.from(EVENT_DEMO_PHOTO_BUCKET).upload(path, optimized, { contentType: "image/webp", cacheControl: "private, max-age=0", upsert: false });
+    const uploadBytes = new Uint8Array(optimized.buffer, optimized.byteOffset, optimized.byteLength);
+    const { error } = await adminStorageClient().storage.from(EVENT_DEMO_PHOTO_BUCKET).upload(path, uploadBytes, { contentType: "image/webp", cacheControl: "private, max-age=0", upsert: false });
     if (error) throw new EventDemoPhotoError("Photo upload could not be completed.");
   }
 
