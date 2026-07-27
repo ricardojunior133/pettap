@@ -39,9 +39,9 @@ export interface EventDemoPhotoStorage extends EventDemoTemporaryStorage {
 export class SupabaseEventDemoPhotoStorage implements EventDemoPhotoStorage {
   async uploadTemporaryPhoto(path: string, file: File): Promise<void> {
     assertPhotoInput(file);
-    let optimized: Buffer;
+    let optimizedBuffer: Buffer;
     try {
-      optimized = await sharp(Buffer.from(await file.arrayBuffer()), { limitInputPixels: 25_000_000 })
+      optimizedBuffer = await sharp(Buffer.from(await file.arrayBuffer()), { limitInputPixels: 25_000_000 })
         .rotate()
         .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
         .webp({ quality: 84 })
@@ -49,8 +49,11 @@ export class SupabaseEventDemoPhotoStorage implements EventDemoPhotoStorage {
     } catch {
       throw new EventDemoPhotoError("We couldn't read that image. Please choose a different photo.");
     }
-    const uploadBytes = new Uint8Array(optimized.buffer, optimized.byteOffset, optimized.byteLength);
-    const { error } = await adminStorageClient().storage.from(EVENT_DEMO_PHOTO_BUCKET).upload(path, uploadBytes, { contentType: "image/webp", cacheControl: "private, max-age=0", upsert: false });
+    const uploadArrayBuffer = optimizedBuffer.buffer.slice(
+      optimizedBuffer.byteOffset,
+      optimizedBuffer.byteOffset + optimizedBuffer.byteLength,
+    ) as ArrayBuffer;
+    const { error } = await adminStorageClient().storage.from(EVENT_DEMO_PHOTO_BUCKET).upload(path, uploadArrayBuffer, { contentType: "image/webp", cacheControl: "private, max-age=0", upsert: false });
     if (error) throw new EventDemoPhotoError("Photo upload could not be completed.");
   }
 

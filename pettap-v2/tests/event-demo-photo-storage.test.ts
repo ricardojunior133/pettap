@@ -29,7 +29,7 @@ const sourcePhoto = readFileSync(resolve(process.cwd(), "public/images/pets/char
 const targetPath = "event-demo/c23e44bd-a981-4d2a-8f19-cd863a8fce9d/d47a57ae-5c4e-4d79-9b68-ffdc70b8d181/photo.webp";
 
 describe("Event Demo WebP storage payload", () => {
-  it("uploads the exact optimized WebP bytes as a Uint8Array", async () => {
+  it("uploads the exact optimized WebP bytes as an ArrayBuffer", async () => {
     const expected = await sharp(sourcePhoto, { limitInputPixels: 25_000_000 })
       .rotate()
       .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
@@ -45,11 +45,11 @@ describe("Event Demo WebP storage payload", () => {
 
     const [path, payload, options] = upload.mock.calls[0] ?? [];
     expect(path).toBe(targetPath);
-    expect(payload).toBeInstanceOf(Uint8Array);
-    expect(Buffer.isBuffer(payload)).toBe(false);
+    expect(payload).toBeInstanceOf(ArrayBuffer);
     expect(payload.byteLength).toBe(expected.byteLength);
-    expect([...payload.subarray(0, 12)]).toEqual([...expected.subarray(0, 12)]);
-    await expect(sharp(payload).metadata()).resolves.toMatchObject({ format: "webp", width: 1080, height: 1080 });
+    const uploadBytes = new Uint8Array(payload);
+    expect([...uploadBytes.subarray(0, 12)]).toEqual([...expected.subarray(0, 12)]);
+    await expect(sharp(uploadBytes).metadata()).resolves.toMatchObject({ format: "webp", width: 1080, height: 1080 });
     expect(options).toEqual({ contentType: "image/webp", cacheControl: "private, max-age=0", upsert: false });
   });
 });
