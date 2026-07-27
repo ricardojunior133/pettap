@@ -8,6 +8,20 @@
       "when": 1784778909094,
       "tag": "0000_chilly_nebula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784865300000,
+      "tag": "0001_enable_rls_and_account_isolation",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784962500000,
+      "tag": "0003_commerce_and_operations_foundation",
+      "breakpoints": true
     }
   ]
 }
