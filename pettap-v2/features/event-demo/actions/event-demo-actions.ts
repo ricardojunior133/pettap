@@ -67,6 +67,7 @@ export async function uploadEventDemoPhoto(publicCode: string, formData: FormDat
   try {
     const cookie = await owned(publicCode);
     const result = await new EventDemoPhotoService().replaceOwnedPhoto(cookie.publicId, cookie.token, file);
+    revalidatePath(`/event/profile/${cookie.publicId}`);
     return { status: "success", message: "Photo saved.", step: "privacy", previewUrl: result.previewUrl };
   } catch (error) {
     if (error instanceof EventDemoPhotoError) return { status: "error", message: error.message };

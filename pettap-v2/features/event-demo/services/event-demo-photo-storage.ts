@@ -11,6 +11,7 @@ import { EVENT_DEMO_MAX_UPLOAD_SIZE, EVENT_DEMO_PHOTO_BUCKET, EVENT_DEMO_SIGNED_
 import type { EventDemoTemporaryStorage, TemporaryPhotoDeletionResult } from "./event-demo-temporary-storage";
 
 export class EventDemoPhotoError extends Error {}
+export class EventDemoPhotoMissingError extends EventDemoPhotoError {}
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
@@ -21,7 +22,7 @@ export function buildEventDemoPhotoPath(demoTagId: string, sessionId: string): s
 }
 
 function assertPhotoInput(file: File) {
-  if (!allowedMimeTypes.has(file.type) || file.size <= 0 || file.size > EVENT_DEMO_MAX_UPLOAD_SIZE) throw new EventDemoPhotoError("Choose a JPG, PNG, WebP, HEIC or HEIF image smaller than 5 MB.");
+  if (!allowedMimeTypes.has(file.type) || file.size <= 0 || file.size > EVENT_DEMO_MAX_UPLOAD_SIZE) throw new EventDemoPhotoError("Choose a JPG, PNG, WebP, HEIC or HEIF image smaller than 6 MB.");
   if (["image/svg+xml", "image/gif"].includes(file.type)) throw new EventDemoPhotoError("Choose a JPG, PNG, WebP, HEIC or HEIF image.");
 }
 
@@ -65,7 +66,8 @@ export class SupabaseEventDemoPhotoStorage implements EventDemoPhotoStorage {
     const filename = path.slice(separatorIndex + 1);
     const storage = adminStorageClient().storage.from(EVENT_DEMO_PHOTO_BUCKET);
     const { data: files, error: listError } = await storage.list(directory, { limit: 1, search: filename });
-    if (listError || !files?.some((file) => file.name === filename)) throw new EventDemoPhotoError("Photo preview could not be prepared.");
+    if (listError) throw new EventDemoPhotoError("Photo preview could not be prepared.");
+    if (!files?.some((file) => file.name === filename)) throw new EventDemoPhotoMissingError("Photo is no longer available.");
     const { data, error } = await storage.createSignedUrl(path, EVENT_DEMO_SIGNED_URL_SECONDS);
     if (error || !data?.signedUrl) throw new EventDemoPhotoError("Photo preview could not be prepared.");
     return data.signedUrl;

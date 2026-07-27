@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { EventDemoPublicProfileService } from "@/features/event-demo/services/event-demo-public-profile-service";
+import { EventDemoPhotoError, EventDemoPhotoMissingError } from "@/features/event-demo/services/event-demo-photo-storage";
 import type { EventDemoSession } from "@/db/schema";
 
 const now = new Date("2026-07-26T13:00:00.000Z");
@@ -50,5 +51,26 @@ describe("Event Demo public profile DTO", () => {
     const result = service(baseSession);
     await result.service.resolve(baseSession.publicId, now);
     expect(result.audit.record).toHaveBeenCalledWith(expect.objectContaining({ action: "event_demo.profile_viewed", metadata: { demoTagId: baseSession.demoTagId, sessionId: baseSession.id, status: "completed", source: "event_demo" } }));
+  });
+
+  it("uses the photo fallback only when the persisted storage object is actually missing", async () => {
+    const repository = { findByPublicId: vi.fn().mockResolvedValue(baseSession) };
+    const lifecycle = { expireSessionIfNeeded: vi.fn(), cleanupExpiredSession: vi.fn() };
+    const storage = { createPreviewUrl: vi.fn().mockRejectedValue(new EventDemoPhotoMissingError("missing")) };
+    const audit = { record: vi.fn() };
+    const resolver = new EventDemoPublicProfileService(repository, lifecycle, storage, audit);
+    const result = await resolver.resolve(baseSession.publicId, now);
+    expect(result).toMatchObject({ kind: "profile", profile: { photoSignedUrl: null } });
+    expect(audit.record).toHaveBeenCalledWith(expect.objectContaining({ action: "event_demo.profile_viewed" }));
+  });
+
+  it("does not silently turn an unexpected signing failure into a photo fallback", async () => {
+    const repository = { findByPublicId: vi.fn().mockResolvedValue(baseSession) };
+    const lifecycle = { expireSessionIfNeeded: vi.fn(), cleanupExpiredSession: vi.fn() };
+    const storage = { createPreviewUrl: vi.fn().mockRejectedValue(new EventDemoPhotoError("storage unavailable")) };
+    const audit = { record: vi.fn() };
+    const resolver = new EventDemoPublicProfileService(repository, lifecycle, storage, audit);
+    await expect(resolver.resolve(baseSession.publicId, now)).rejects.toThrow("storage unavailable");
+    expect(audit.record).toHaveBeenCalledWith(expect.objectContaining({ action: "event_demo.error" }));
   });
 });

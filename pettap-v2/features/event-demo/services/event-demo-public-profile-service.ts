@@ -3,7 +3,7 @@ import "server-only";
 import { EventDemoSessionRepository, type EventDemoSessionRecord } from "../repositories/event-demo-session-repository";
 import { eventDemoPublicIdSchema } from "../schemas/event-demo";
 import { EventDemoAuditService } from "./event-demo-audit-service";
-import { SupabaseEventDemoPhotoStorage, type EventDemoPhotoStorage } from "./event-demo-photo-storage";
+import { EventDemoPhotoMissingError, SupabaseEventDemoPhotoStorage, type EventDemoPhotoStorage } from "./event-demo-photo-storage";
 import { EventDemoSessionService } from "./event-demo-session-service";
 
 export type EventDemoPublicProfile = {
@@ -66,7 +66,14 @@ export class EventDemoPublicProfileService {
     let photoSignedUrl: string | null = null;
     if (session.photoStoragePath) {
       try { photoSignedUrl = await this.storage.createPreviewUrl(session.photoStoragePath); }
-      catch { await this.audit.record({ action: "event_demo.error", targetType: "event_demo_session", targetId: session.id, result: "failed", metadata: { demoTagId: session.demoTagId, sessionId: session.id, errorCode: "public_photo_sign_failed" } }); }
+      catch (error) {
+        if (error instanceof EventDemoPhotoMissingError) {
+          photoSignedUrl = null;
+        } else {
+          await this.audit.record({ action: "event_demo.error", targetType: "event_demo_session", targetId: session.id, result: "failed", metadata: { demoTagId: session.demoTagId, sessionId: session.id, errorCode: "public_photo_sign_failed" } });
+          throw error;
+        }
+      }
     }
     const profile = mapPublicProfile(session, photoSignedUrl);
     if (!profile) return { kind: "unavailable" };
