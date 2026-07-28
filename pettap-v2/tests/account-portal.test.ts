@@ -22,6 +22,10 @@ describe("AccountPortalService", () => {
       displayName: "Alex Morgan",
       email: "owner@example.test",
       phone: "+44 7700 900000",
+      createdAt: null,
+      lastSignInAt: null,
+      emailVerified: false,
+      preferences: { language: null, timeZone: null, communications: null },
     });
   });
 
