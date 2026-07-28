@@ -84,10 +84,14 @@
                     "features/commerce/repositories/order-repository.ts",
                     "features/commerce/services/commerce-account-service.ts",
                     "features/commerce/services/order-read-service.ts",
+                    "features/commerce/repositories/customer-address-repository.ts",
+                    "features/commerce/services/customer-address-service.ts",
+                    "features/commerce/schemas/address.ts",
                     "features/commerce/types/commerce.ts",
                     "db/schema/commerce.ts",
                     "tests/customer-orders-read.test.ts",
                     "tests/customer-order-details.test.ts"
+                    ,"tests/customer-profile.test.ts"
                 ],
     "exclude":  [
                     "node_modules",
