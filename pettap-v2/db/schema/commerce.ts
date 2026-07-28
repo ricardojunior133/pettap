@@ -17,6 +17,8 @@ export const orderStatus = pgEnum("order_status", ["draft", "pending_payment", "
 export const paymentStatus = pgEnum("payment_status", ["unpaid", "pending", "paid", "partially_refunded", "refunded", "failed", "cancelled"]);
 export const fulfilmentStatus = pgEnum("fulfilment_status", ["unfulfilled", "queued", "in_production", "ready", "shipped", "delivered", "cancelled"]);
 export const productionStatus = pgEnum("production_status", ["not_started", "queued", "printing", "quality_check", "completed", "failed", "cancelled"]);
+// Mirrors the already-versioned 0010 migration. This declaration does not run SQL.
+export const transactionalNotificationStatus = pgEnum("transactional_notification_status", ["pending", "sent", "failed"]);
 
 export type AddressSnapshot = {
   fullName: string;
@@ -218,3 +220,25 @@ export const orderStatusHistory = pgTable("order_status_history", {
   reason: text("reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [index("order_status_history_order_id_idx").on(t.orderId)]);
+
+/** Private delivery log. Customer reads are always scoped through the owning order. */
+export const transactionalNotifications = pgTable("transactional_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
+  notificationType: text("notification_type").notNull(),
+  recipient: text("recipient").notNull(),
+  subject: text("subject").notNull(),
+  payload: jsonb("payload").notNull(),
+  provider: text("provider").notNull(),
+  status: transactionalNotificationStatus("status").default("pending").notNull(),
+  providerMessageId: text("provider_message_id"),
+  errorMessage: text("error_message"),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  failedAt: timestamp("failed_at", { withTimezone: true }),
+  ...timestamps,
+}, (t) => [
+  uniqueIndex("transactional_notifications_order_type_unique").on(t.orderId, t.notificationType),
+  index("transactional_notifications_account_created_idx").on(t.accountId, t.createdAt),
+  index("transactional_notifications_status_created_idx").on(t.status, t.createdAt),
+]);
