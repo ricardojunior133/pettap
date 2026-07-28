@@ -90,8 +90,12 @@
                     "features/commerce/types/commerce.ts",
                     "db/schema/commerce.ts",
                     "tests/customer-orders-read.test.ts",
-                    "tests/customer-order-details.test.ts"
-                    ,"tests/customer-profile.test.ts"
+                    "tests/customer-order-details.test.ts",
+                    "tests/customer-profile.test.ts",
+                    "tests/customer-notifications.test.ts",
+                    "features/account/repositories/customer-notification-repository.ts",
+                    "features/account/services/customer-notification-service.ts",
+                    "features/account/actions/customer-notification-actions.ts"
                 ],
     "exclude":  [
                     "node_modules",

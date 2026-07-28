@@ -5,6 +5,7 @@ import { logoutAction } from "@/features/auth/actions/auth-actions";
 const navigation = [
   { href: "/account", label: "Overview" },
   { href: "/account/orders", label: "Orders" },
+  { href: "/account/notifications", label: "Notifications" },
   { href: "/account/profile", label: "Profile" },
 ] as const;
 
