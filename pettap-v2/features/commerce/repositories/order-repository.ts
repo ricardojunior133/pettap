@@ -5,7 +5,7 @@ import { and, count, desc, eq, sql } from "drizzle-orm";
 import { fulfilments, orderItems, orders } from "@/db/schema";
 import { createDatabaseClient } from "@/lib/backend/db";
 
-import type { FulfilmentStatus, OrderStatus } from "../types/commerce";
+import type { FulfilmentStatus, OrderStatus, ProductionStatus } from "../types/commerce";
 
 export type CustomerOrderReadRecord = {
   orderNumber: string;
@@ -28,9 +28,42 @@ export type CustomerOrderPagination = {
   pageSize: number;
 };
 
+export type CustomerOrderDetailRecord = {
+  order: {
+    orderNumber: string;
+    createdAt: Date;
+    status: OrderStatus;
+    fulfilmentStatus: FulfilmentStatus;
+    currency: string;
+    subtotalMinor: number;
+    discountTotalMinor: number;
+    shippingTotalMinor: number;
+    taxTotalMinor: number;
+    totalMinor: number;
+  };
+  items: Array<{
+    productName: string;
+    variantName: string;
+    sku: string;
+    quantity: number;
+    unitPriceMinor: number;
+    lineTotalMinor: number;
+    productionStatus: ProductionStatus;
+    personalisation: unknown;
+  }>;
+  fulfilment: {
+    status: FulfilmentStatus;
+    carrier: string | null;
+    trackingNumber: string | null;
+    shippedAt: Date | null;
+    deliveredAt: Date | null;
+  } | null;
+};
+
 export interface OrderRepository {
   listOrders(accountId: string, pagination: CustomerOrderPagination): Promise<CustomerOrderPage>;
   getOrderByNumber(accountId: string, orderNumber: string): Promise<CustomerOrderReadRecord | null>;
+  getOrderDetailByNumber(accountId: string, orderNumber: string): Promise<CustomerOrderDetailRecord | null>;
 }
 
 /**
@@ -102,5 +135,74 @@ export class DrizzleOrderRepository implements OrderRepository {
       .limit(1);
 
     return row ? { ...row, itemCount: Number(row.itemCount) } : null;
+  }
+
+  async getOrderDetailByNumber(accountId: string, orderNumber: string): Promise<CustomerOrderDetailRecord | null> {
+    const database = createDatabaseClient();
+    const [ownedOrder] = await database
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        createdAt: orders.createdAt,
+        status: orders.status,
+        fulfilmentStatus: orders.fulfilmentStatus,
+        currency: orders.currency,
+        subtotalMinor: orders.subtotalMinor,
+        discountTotalMinor: orders.discountTotalMinor,
+        shippingTotalMinor: orders.shippingTotalMinor,
+        taxTotalMinor: orders.taxTotalMinor,
+        totalMinor: orders.grandTotalMinor,
+      })
+      .from(orders)
+      .where(and(eq(orders.accountId, accountId), eq(orders.orderNumber, orderNumber)))
+      .limit(1);
+
+    // Do not issue item or fulfilment queries until owner-scoped lookup succeeds.
+    if (!ownedOrder) return null;
+
+    const [items, fulfilmentRows] = await Promise.all([
+      database
+        .select({
+          productName: orderItems.productName,
+          variantName: orderItems.variantName,
+          sku: orderItems.sku,
+          quantity: orderItems.quantity,
+          unitPriceMinor: orderItems.unitPriceMinor,
+          lineTotalMinor: orderItems.lineTotalMinor,
+          productionStatus: orderItems.productionStatus,
+          personalisation: orderItems.personalisation,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, ownedOrder.id)),
+      database
+        .select({
+          status: fulfilments.status,
+          carrier: fulfilments.provider,
+          trackingNumber: fulfilments.trackingNumber,
+          shippedAt: fulfilments.shippedAt,
+          deliveredAt: fulfilments.deliveredAt,
+        })
+        .from(fulfilments)
+        .where(eq(fulfilments.orderId, ownedOrder.id))
+        .orderBy(desc(fulfilments.createdAt))
+        .limit(1),
+    ]);
+
+    return {
+      order: {
+        orderNumber: ownedOrder.orderNumber,
+        createdAt: ownedOrder.createdAt,
+        status: ownedOrder.status,
+        fulfilmentStatus: ownedOrder.fulfilmentStatus,
+        currency: ownedOrder.currency,
+        subtotalMinor: ownedOrder.subtotalMinor,
+        discountTotalMinor: ownedOrder.discountTotalMinor,
+        shippingTotalMinor: ownedOrder.shippingTotalMinor,
+        taxTotalMinor: ownedOrder.taxTotalMinor,
+        totalMinor: ownedOrder.totalMinor,
+      },
+      items,
+      fulfilment: fulfilmentRows[0] ?? null,
+    };
   }
 }

@@ -85,7 +85,9 @@
                     "features/commerce/services/commerce-account-service.ts",
                     "features/commerce/services/order-read-service.ts",
                     "features/commerce/types/commerce.ts",
-                    "db/schema/commerce.ts"
+                    "db/schema/commerce.ts",
+                    "tests/customer-orders-read.test.ts",
+                    "tests/customer-order-details.test.ts"
                 ],
     "exclude":  [
                     "node_modules",
