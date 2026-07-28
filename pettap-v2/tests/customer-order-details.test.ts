@@ -11,6 +11,7 @@ import type {
   OrderRepository,
 } from "@/features/commerce/repositories/order-repository";
 import {
+  buildCustomerOrderTimeline,
   hasConsistentOrderTotals,
   OrderReadService,
 } from "@/features/commerce/services/order-read-service";
@@ -31,6 +32,8 @@ function detailRecord(overrides: Partial<CustomerOrderDetailRecord> = {}): Custo
       shippingTotalMinor: 299,
       taxTotalMinor: 0,
       totalMinor: 2598,
+      paymentStatus: "paid",
+      cancelledAt: null,
     },
     items: [{
       productName: "PetTap Essential",
@@ -55,6 +58,8 @@ function detailRecord(overrides: Partial<CustomerOrderDetailRecord> = {}): Custo
       shippedAt: null,
       deliveredAt: null,
     },
+    paymentReceivedAt: new Date("2026-07-27T10:00:00.000Z"),
+    history: [],
     ...overrides,
   };
 }
@@ -87,7 +92,7 @@ describe("customer order detail reads", () => {
     const repository = new DetailRepository({ [`${accountA}:PT-10025`]: detailRecord() });
     const detail = await new OrderReadService(repository, async () => accountA).getOrderDetail("PT-10025");
 
-    expect(detail).toEqual({
+    expect(detail).toMatchObject({
       orderNumber: "PT-10025",
       createdAt: "2026-07-28T12:00:00.000Z",
       status: "Printed",
@@ -108,6 +113,14 @@ describe("customer order detail reads", () => {
       }],
       tracking: { carrier: "Royal Mail", number: "RM-123", shippedAt: null, deliveredAt: null },
     });
+    expect(detail?.timeline.map((event) => [event.key, event.status, event.occurredAt])).toEqual([
+      ["payment", "completed", "2026-07-27T10:00:00.000Z"],
+      ["production", "completed", null],
+      ["printed", "current", null],
+      ["packed", "upcoming", null],
+      ["shipped", "upcoming", null],
+      ["delivered", "upcoming", null],
+    ]);
     expect(JSON.stringify(detail)).not.toContain("internalNote");
     expect(JSON.stringify(detail)).not.toContain("stripeSessionId");
     expect(JSON.stringify(detail)).not.toContain("accountId");
@@ -159,5 +172,59 @@ describe("customer order detail reads", () => {
     expect(source).not.toContain(".insert(");
     expect(source).not.toContain(".update(");
     expect(source).not.toContain(".delete(");
+  });
+
+  it("builds the canonical paid, production, printed, packed, shipped, and delivered states", () => {
+    const paid = buildCustomerOrderTimeline(detailRecord({
+      order: { ...detailRecord().order, status: "paid", fulfilmentStatus: "unfulfilled" },
+      items: [{ ...detailRecord().items[0], productionStatus: "not_started" }],
+    }));
+    const packed = buildCustomerOrderTimeline(detailRecord({
+      order: { ...detailRecord().order, status: "ready_to_ship", fulfilmentStatus: "ready" },
+      items: [{ ...detailRecord().items[0], productionStatus: "completed" }],
+    }));
+    const shipped = buildCustomerOrderTimeline(detailRecord({
+      order: { ...detailRecord().order, status: "shipped", fulfilmentStatus: "shipped" },
+      fulfilment: { ...detailRecord().fulfilment!, status: "shipped", trackingNumber: null, shippedAt: new Date("2026-07-28T13:00:00.000Z") },
+    }));
+    const delivered = buildCustomerOrderTimeline(detailRecord({
+      order: { ...detailRecord().order, status: "completed", fulfilmentStatus: "delivered" },
+      fulfilment: { ...detailRecord().fulfilment!, status: "delivered", deliveredAt: new Date("2026-07-29T13:00:00.000Z") },
+    }));
+
+    expect(paid[0]?.status).toBe("current");
+    expect(packed.find((event) => event.key === "packed")?.status).toBe("current");
+    expect(shipped.find((event) => event.key === "shipped")?.occurredAt).toBe("2026-07-28T13:00:00.000Z");
+    expect(shipped.find((event) => event.key === "delivered")?.status).toBe("upcoming");
+    expect(delivered.find((event) => event.key === "delivered")?.status).toBe("current");
+  });
+
+  it("deduplicates out-of-order history and preserves the earliest persisted timestamp", () => {
+    const timeline = buildCustomerOrderTimeline(detailRecord({
+      history: [
+        { status: "shipped", occurredAt: new Date("2026-07-30T10:00:00.000Z") },
+        { status: "paid", occurredAt: new Date("2026-07-27T10:00:00.000Z") },
+        { status: "shipped", occurredAt: new Date("2026-07-29T10:00:00.000Z") },
+        { status: "future_unknown", occurredAt: new Date("2026-07-31T10:00:00.000Z") },
+      ],
+    }));
+
+    expect(timeline.filter((event) => event.key === "shipped")).toHaveLength(1);
+    expect(timeline.find((event) => event.key === "shipped")?.occurredAt).toBe("2026-07-29T10:00:00.000Z");
+    expect(timeline.some((event) => event.key === "cancelled")).toBe(false);
+  });
+
+  it("does not fabricate missing timestamps and treats a cancellation as terminal", () => {
+    const timeline = buildCustomerOrderTimeline(detailRecord({
+      order: { ...detailRecord().order, status: "cancelled", fulfilmentStatus: "cancelled", cancelledAt: new Date("2026-07-28T15:00:00.000Z") },
+      paymentReceivedAt: null,
+      history: [{ status: "paid", occurredAt: new Date("2026-07-27T10:00:00.000Z") }],
+      fulfilment: null,
+      items: [{ ...detailRecord().items[0], productionStatus: "not_started" }],
+    }));
+
+    expect(timeline.find((event) => event.key === "payment")).toMatchObject({ status: "completed", occurredAt: "2026-07-27T10:00:00.000Z" });
+    expect(timeline.find((event) => event.key === "delivered")?.status).toBe("upcoming");
+    expect(timeline.at(-1)).toEqual(expect.objectContaining({ key: "cancelled", status: "cancelled", occurredAt: "2026-07-28T15:00:00.000Z" }));
   });
 });
