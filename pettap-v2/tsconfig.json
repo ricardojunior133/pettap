@@ -96,6 +96,12 @@
                     "features/account/repositories/customer-notification-repository.ts",
                     "features/account/services/customer-notification-service.ts",
                     "features/account/actions/customer-notification-actions.ts"
+                    ,"features/account/repositories/customer-pet-foundation-repository.ts"
+                    ,"features/account/repositories/customer-tag-foundation-repository.ts"
+                    ,"features/account/repositories/customer-tag-activation-foundation-repository.ts"
+                    ,"features/account/services/customer-pet-foundation-service.ts"
+                    ,"features/account/services/customer-tag-foundation-service.ts"
+                    ,"tests/customer-nfc-pets-foundation.test.ts"
                 ],
     "exclude":  [
                     "node_modules",
