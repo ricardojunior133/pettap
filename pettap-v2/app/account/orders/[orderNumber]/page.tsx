@@ -34,6 +34,13 @@ function readablePersonalisationKey(key: string) {
   return key.replace(/([A-Z])/g, " $1").replace(/^./, (value) => value.toUpperCase());
 }
 
+const timelineMarkerClasses = {
+  completed: "border-emerald-600 bg-emerald-600 text-white",
+  current: "border-neutral-950 bg-neutral-950 text-white",
+  upcoming: "border-neutral-300 bg-white text-neutral-500",
+  cancelled: "border-rose-600 bg-rose-600 text-white",
+} as const;
+
 export default async function AccountOrderDetailPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
   const order = await new OrderReadService().getOrderDetail(orderNumber);
@@ -85,6 +92,28 @@ export default async function AccountOrderDetailPage({ params }: { params: Promi
                 </article>
               ))}
             </div>
+          </Card>
+
+          <Card variant="outlined" className="p-5 sm:p-7">
+            <h2 className="text-xl font-semibold tracking-[-0.04em]">Order progress</h2>
+            <ol className="mt-6 space-y-0" aria-label="Order progress">
+              {order.timeline.map((event, index) => (
+                <li key={event.key} className="relative grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 pb-6 last:pb-0" aria-current={event.status === "current" || event.status === "cancelled" ? "step" : undefined}>
+                  {index < order.timeline.length - 1 ? <span aria-hidden="true" className="absolute left-[1.06rem] top-8 h-[calc(100%-1.25rem)] border-l border-neutral-200" /> : null}
+                  <span aria-hidden="true" className={`relative z-10 flex size-9 items-center justify-center rounded-full border text-xs font-bold ${timelineMarkerClasses[event.status]}`}>
+                    {event.status === "completed" ? "✓" : event.status === "cancelled" ? "×" : index + 1}
+                  </span>
+                  <div className="min-w-0 pt-1">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <h3 className="font-semibold">{event.label}</h3>
+                      <span className="text-xs font-medium uppercase tracking-[0.1em] text-neutral-500">{event.status}</span>
+                    </div>
+                    <p className="mt-1 text-sm leading-6 text-neutral-600">{event.description}</p>
+                    {event.occurredAt ? <time className="mt-2 block text-sm font-medium text-neutral-700" dateTime={event.occurredAt}>{formatDateTime(event.occurredAt)}</time> : null}
+                  </div>
+                </li>
+              ))}
+            </ol>
           </Card>
 
           {order.tracking ? (
