@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   OrderReadService,
   type CustomerOrderViewModel,
+  type CustomerOrderDetailViewModel,
   type CustomerOrdersPageViewModel,
 } from "@/features/commerce/services/order-read-service";
 
@@ -27,4 +28,9 @@ export async function getCustomerOrders(input: unknown = {}): Promise<CustomerOr
 /** Read-only, authenticated, owner-scoped order lookup. */
 export async function getCustomerOrder(orderNumber: unknown): Promise<CustomerOrderViewModel | null> {
   return new OrderReadService().getOrder(orderNumberInput.parse(orderNumber));
+}
+
+/** Read-only, authenticated, owner-scoped customer order detail. */
+export async function getCustomerOrderDetail(orderNumber: unknown): Promise<CustomerOrderDetailViewModel | null> {
+  return new OrderReadService().getOrderDetail(orderNumberInput.parse(orderNumber));
 }
