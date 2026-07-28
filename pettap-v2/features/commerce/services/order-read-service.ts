@@ -81,6 +81,15 @@ export type CustomerOrderDetailViewModel = {
     shippedAt: string | null;
     deliveredAt: string | null;
   } | null;
+  timeline: CustomerOrderTimelineItemDto[];
+};
+
+export type CustomerOrderTimelineItemDto = {
+  key: "payment" | "production" | "printed" | "packed" | "shipped" | "delivered" | "cancelled";
+  label: string;
+  description: string;
+  status: "completed" | "current" | "upcoming" | "cancelled";
+  occurredAt: string | null;
 };
 
 const pageSize = 12;
@@ -110,6 +119,84 @@ export function sanitizeOrderPersonalisation(value: unknown): CustomerOrderItemD
 /** Integer minor-unit validation only; persisted totals remain the authority. */
 export function hasConsistentOrderTotals(record: Pick<CustomerOrderDetailRecord["order"], "subtotalMinor" | "discountTotalMinor" | "shippingTotalMinor" | "taxTotalMinor" | "totalMinor">) {
   return record.subtotalMinor + record.shippingTotalMinor + record.taxTotalMinor - record.discountTotalMinor === record.totalMinor;
+}
+
+const timelineStages = [
+  { key: "payment", label: "Payment received", description: "We've received your payment and confirmed your order." },
+  { key: "production", label: "In production", description: "Your personalised PetTap items are being prepared." },
+  { key: "printed", label: "Printed", description: "Your items have been printed and passed to the next stage." },
+  { key: "packed", label: "Packed", description: "Your order has been carefully packed." },
+  { key: "shipped", label: "Shipped", description: "Your order is on its way." },
+  { key: "delivered", label: "Delivered", description: "Your order has been delivered." },
+] as const;
+
+type TimelineKey = (typeof timelineStages)[number]["key"];
+
+const historyStatusKey: Record<string, TimelineKey | "cancelled" | undefined> = {
+  paid: "payment",
+  in_production: "production",
+  ready_to_ship: "packed",
+  shipped: "shipped",
+  completed: "delivered",
+  cancelled: "cancelled",
+};
+
+function earliestDate(current: Date | null | undefined, candidate: Date | null | undefined) {
+  if (!candidate) return current ?? null;
+  if (!current) return candidate;
+  return candidate < current ? candidate : current;
+}
+
+/** Builds presentation-only progress from persisted order, item, fulfilment, and payment evidence. */
+export function buildCustomerOrderTimeline(record: CustomerOrderDetailRecord): CustomerOrderTimelineItemDto[] {
+  const evidence = new Map<TimelineKey | "cancelled", Date | null>();
+  const remember = (key: TimelineKey | "cancelled", occurredAt: Date | null = null) => {
+    if (!evidence.has(key)) evidence.set(key, occurredAt);
+    else evidence.set(key, earliestDate(evidence.get(key), occurredAt));
+  };
+
+  for (const event of record.history) {
+    const key = historyStatusKey[event.status];
+    if (key) remember(key, event.occurredAt);
+  }
+
+  if (record.order.paymentStatus === "paid" || record.order.status === "paid") remember("payment", record.paymentReceivedAt);
+  if (record.order.status === "in_production" || record.order.fulfilmentStatus === "in_production") remember("production");
+  if (record.order.status === "ready_to_ship" || record.order.fulfilmentStatus === "ready") remember("packed");
+  if (record.order.status === "shipped" || record.order.fulfilmentStatus === "shipped") remember("shipped", record.fulfilment?.shippedAt);
+  if (record.order.status === "completed" || record.order.fulfilmentStatus === "delivered") remember("delivered", record.fulfilment?.deliveredAt);
+  if (record.order.status === "cancelled" || record.order.status === "refunded" || record.order.fulfilmentStatus === "cancelled") remember("cancelled", record.order.cancelledAt);
+
+  if (record.items.some((item) => item.productionStatus === "queued" || item.productionStatus === "printing")) remember("production");
+  if (record.items.some((item) => item.productionStatus === "quality_check" || item.productionStatus === "completed")) remember("printed");
+  if (record.fulfilment?.shippedAt) remember("shipped", record.fulfilment.shippedAt);
+  if (record.fulfilment?.deliveredAt) remember("delivered", record.fulfilment.deliveredAt);
+
+  const cancelledAt = evidence.get("cancelled");
+  const knownStageIndexes = timelineStages
+    .map((stage, index) => evidence.has(stage.key) ? index : -1)
+    .filter((index) => index >= 0);
+  const currentIndex = knownStageIndexes.length > 0 ? Math.max(...knownStageIndexes) : -1;
+
+  const items = timelineStages.map((stage, index): CustomerOrderTimelineItemDto => ({
+    ...stage,
+    status: cancelledAt !== undefined
+      ? index <= currentIndex ? "completed" : "upcoming"
+      : index < currentIndex ? "completed" : index === currentIndex ? "current" : "upcoming",
+    occurredAt: evidence.get(stage.key)?.toISOString() ?? null,
+  }));
+
+  if (cancelledAt !== undefined) {
+    items.push({
+      key: "cancelled",
+      label: "Cancelled",
+      description: "This order was cancelled.",
+      status: "cancelled",
+      occurredAt: cancelledAt?.toISOString() ?? null,
+    });
+  }
+
+  return items;
 }
 
 function toViewModel(record: CustomerOrderReadRecord): CustomerOrderViewModel {
@@ -157,6 +244,7 @@ function toDetailViewModel(record: CustomerOrderDetailRecord): CustomerOrderDeta
       shippedAt: record.fulfilment.shippedAt?.toISOString() ?? null,
       deliveredAt: record.fulfilment.deliveredAt?.toISOString() ?? null,
     } : null,
+    timeline: buildCustomerOrderTimeline(record),
   };
 }
 

@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, count, desc, eq, sql } from "drizzle-orm";
 
-import { fulfilments, orderItems, orders } from "@/db/schema";
+import { fulfilments, orderItems, orders, orderStatusHistory, payments } from "@/db/schema";
 import { createDatabaseClient } from "@/lib/backend/db";
 
 import type { FulfilmentStatus, OrderStatus, ProductionStatus } from "../types/commerce";
@@ -40,6 +40,8 @@ export type CustomerOrderDetailRecord = {
     shippingTotalMinor: number;
     taxTotalMinor: number;
     totalMinor: number;
+    paymentStatus: string;
+    cancelledAt: Date | null;
   };
   items: Array<{
     productName: string;
@@ -58,6 +60,8 @@ export type CustomerOrderDetailRecord = {
     shippedAt: Date | null;
     deliveredAt: Date | null;
   } | null;
+  paymentReceivedAt: Date | null;
+  history: Array<{ status: string; occurredAt: Date }>;
 };
 
 export interface OrderRepository {
@@ -152,6 +156,8 @@ export class DrizzleOrderRepository implements OrderRepository {
         shippingTotalMinor: orders.shippingTotalMinor,
         taxTotalMinor: orders.taxTotalMinor,
         totalMinor: orders.grandTotalMinor,
+        paymentStatus: orders.paymentStatus,
+        cancelledAt: orders.cancelledAt,
       })
       .from(orders)
       .where(and(eq(orders.accountId, accountId), eq(orders.orderNumber, orderNumber)))
@@ -160,7 +166,7 @@ export class DrizzleOrderRepository implements OrderRepository {
     // Do not issue item or fulfilment queries until owner-scoped lookup succeeds.
     if (!ownedOrder) return null;
 
-    const [items, fulfilmentRows] = await Promise.all([
+    const [items, fulfilmentRows, history, paymentRows] = await Promise.all([
       database
         .select({
           productName: orderItems.productName,
@@ -186,6 +192,17 @@ export class DrizzleOrderRepository implements OrderRepository {
         .where(eq(fulfilments.orderId, ownedOrder.id))
         .orderBy(desc(fulfilments.createdAt))
         .limit(1),
+      database
+        .select({ status: orderStatusHistory.newStatus, occurredAt: orderStatusHistory.createdAt })
+        .from(orderStatusHistory)
+        .where(eq(orderStatusHistory.orderId, ownedOrder.id))
+        .orderBy(orderStatusHistory.createdAt),
+      database
+        .select({ paidAt: payments.paidAt })
+        .from(payments)
+        .where(and(eq(payments.orderId, ownedOrder.id), eq(payments.status, "paid")))
+        .orderBy(desc(payments.paidAt))
+        .limit(1),
     ]);
 
     return {
@@ -200,9 +217,13 @@ export class DrizzleOrderRepository implements OrderRepository {
         shippingTotalMinor: ownedOrder.shippingTotalMinor,
         taxTotalMinor: ownedOrder.taxTotalMinor,
         totalMinor: ownedOrder.totalMinor,
+        paymentStatus: ownedOrder.paymentStatus,
+        cancelledAt: ownedOrder.cancelledAt,
       },
       items,
       fulfilment: fulfilmentRows[0] ?? null,
+      paymentReceivedAt: paymentRows[0]?.paidAt ?? null,
+      history,
     };
   }
 }
