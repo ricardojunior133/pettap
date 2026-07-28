@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import type {
   CustomerOrderPage,
+  CustomerOrderDetailRecord,
   CustomerOrderReadRecord,
   CustomerOrderPagination,
   OrderRepository,
@@ -34,10 +35,12 @@ function record(overrides: Partial<CustomerOrderReadRecord> = {}): CustomerOrder
 class FakeOrderRepository implements OrderRepository {
   readonly listCalls: Array<{ accountId: string; pagination: CustomerOrderPagination }> = [];
   readonly getCalls: Array<{ accountId: string; orderNumber: string }> = [];
+  readonly detailCalls: Array<{ accountId: string; orderNumber: string }> = [];
 
   constructor(
     private readonly page: CustomerOrderPage = { rows: [], total: 0 },
     private readonly byNumber: Record<string, CustomerOrderReadRecord | null> = {},
+    private readonly detailsByNumber: Record<string, CustomerOrderDetailRecord | null> = {},
   ) {}
 
   async listOrders(accountId: string, pagination: CustomerOrderPagination) {
@@ -48,6 +51,11 @@ class FakeOrderRepository implements OrderRepository {
   async getOrderByNumber(accountId: string, orderNumber: string) {
     this.getCalls.push({ accountId, orderNumber });
     return this.byNumber[`${accountId}:${orderNumber}`] ?? null;
+  }
+
+  async getOrderDetailByNumber(accountId: string, orderNumber: string) {
+    this.detailCalls.push({ accountId, orderNumber });
+    return this.detailsByNumber[`${accountId}:${orderNumber}`] ?? null;
   }
 }
 
@@ -129,7 +137,7 @@ describe("customer order reads", () => {
 
   it("keeps the database repository owner predicate and newest-first ordering in both reads", () => {
     const source = readFileSync(resolve(process.cwd(), "features/commerce/repositories/order-repository.ts"), "utf8");
-    expect(source.match(/eq\(orders\.accountId, accountId\)/g)).toHaveLength(2);
+    expect(source.match(/eq\(orders\.accountId, accountId\)/g)).toHaveLength(3);
     expect(source).toContain("orderBy(desc(orders.createdAt), desc(orders.orderNumber))");
   });
 });
