@@ -64,6 +64,7 @@ describe("Commerce foundation schema", () => {
       "0009_stripe_payment_idempotency.sql": "a08ec75273acc7640c3ffd0b456160c1fe22293113a4824965f92fe1e0ce17da",
       "0010_transactional_notification_history.sql": "01cc156e04228c0ec69d0ab6529da674d03dc4af9f45929b6c51d3dadd3da0ac",
       "0011_event_demo_foundation.sql": "48f67903848c35ce9b05ad71d7c3f1e263805abb94f2106d45edf0b701715480",
+      "0012_nfc_tag_credential_foundation.sql": "298f41f92fccc34d0465e384997014f3f3c2c0e45cf5ccbb53e3de88f6aaf1a5",
     };
 
     for (const [file, expectedHash] of Object.entries(canonical)) {
@@ -75,7 +76,10 @@ describe("Commerce foundation schema", () => {
     const names = readdirSync(migrationsDirectory).filter((name) => name.endsWith(".sql")).sort();
     expect(names).toEqual(Object.keys(canonical));
     expect(journal.entries.map((entry) => entry.tag)).toEqual(Object.keys(canonical).map((name) => name.replace(/\.sql$/, "")));
-    expect(readdirSync(resolve(migrationsDirectory, "meta")).sort()).toEqual(["0000_snapshot.json", "_journal.json"]);
+    expect(readdirSync(resolve(migrationsDirectory, "meta")).sort()).toEqual([
+      ...Object.keys(canonical).map((_, index) => `${String(index).padStart(4, "0")}_snapshot.json`),
+      "_journal.json",
+    ]);
   });
 });
 

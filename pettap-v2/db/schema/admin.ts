@@ -1,6 +1,8 @@
-import { index, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { check, index, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 import { accounts } from "./core";
+import { orders } from "./commerce";
 
 export const adminMembershipStatus = pgEnum("admin_membership_status", ["active", "disabled"]);
 
@@ -43,4 +45,15 @@ export const adminMemberships = pgTable("admin_memberships", {
 }, (table) => [
   uniqueIndex("admin_memberships_account_unique").on(table.accountId),
   index("admin_memberships_role_status_idx").on(table.roleId, table.status),
+]);
+
+export const orderAdminNotes = pgTable("order_admin_notes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
+  actorAccountId: uuid("actor_account_id").notNull().references(() => accounts.id, { onDelete: "restrict" }),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("order_admin_notes_order_created_idx").on(table.orderId, table.createdAt),
+  check("order_admin_notes_body_check", sql`char_length(${table.body}) BETWEEN 1 AND 2000`),
 ]);

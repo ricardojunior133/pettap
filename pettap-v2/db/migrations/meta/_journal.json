@@ -85,6 +85,13 @@
       "when": 1785653700000,
       "tag": "0011_event_demo_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1785354431414,
+      "tag": "0012_nfc_tag_credential_foundation",
+      "breakpoints": true
     }
   ]
 }

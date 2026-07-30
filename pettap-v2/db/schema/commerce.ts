@@ -17,6 +17,8 @@ export const orderStatus = pgEnum("order_status", ["draft", "pending_payment", "
 export const paymentStatus = pgEnum("payment_status", ["unpaid", "pending", "paid", "partially_refunded", "refunded", "failed", "cancelled"]);
 export const fulfilmentStatus = pgEnum("fulfilment_status", ["unfulfilled", "queued", "in_production", "ready", "shipped", "delivered", "cancelled"]);
 export const productionStatus = pgEnum("production_status", ["not_started", "queued", "printing", "quality_check", "completed", "failed", "cancelled"]);
+export const checkoutStatus = pgEnum("checkout_status", ["draft", "pending_payment", "paid", "payment_failed", "expired", "cancelled"]);
+export const stripeWebhookProcessingStatus = pgEnum("stripe_webhook_processing_status", ["received", "processed", "failed"]);
 // Mirrors the already-versioned 0010 migration. This declaration does not run SQL.
 export const transactionalNotificationStatus = pgEnum("transactional_notification_status", ["pending", "sent", "failed"]);
 
@@ -241,4 +243,47 @@ export const transactionalNotifications = pgTable("transactional_notifications",
   uniqueIndex("transactional_notifications_order_type_unique").on(t.orderId, t.notificationType),
   index("transactional_notifications_account_created_idx").on(t.accountId, t.createdAt),
   index("transactional_notifications_status_created_idx").on(t.status, t.createdAt),
+]);
+
+export const checkoutAttempts = pgTable("checkout_attempts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  checkoutReference: text("checkout_reference").notNull(),
+  accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
+  customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
+  orderId: uuid("order_id").references(() => orders.id, { onDelete: "set null" }),
+  status: checkoutStatus("status").default("draft").notNull(),
+  currency: varchar("currency", { length: 3 }).default("GBP").notNull(),
+  subtotalMinor: integer("subtotal_minor").notNull(),
+  shippingMinor: integer("shipping_minor").notNull(),
+  totalMinor: integer("total_minor").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerName: text("customer_name").notNull(),
+  shippingAddressSnapshot: jsonb("shipping_address_snapshot"),
+  configurationSnapshot: jsonb("configuration_snapshot").notNull(),
+  stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  paidAt: timestamp("paid_at", { withTimezone: true }),
+  ...timestamps,
+}, (t) => [
+  uniqueIndex("checkout_attempts_reference_unique").on(t.checkoutReference),
+  uniqueIndex("checkout_attempts_order_unique").on(t.orderId),
+  uniqueIndex("checkout_attempts_stripe_session_unique").on(t.stripeCheckoutSessionId).where(sql`${t.stripeCheckoutSessionId} IS NOT NULL`),
+  uniqueIndex("checkout_attempts_stripe_payment_intent_unique").on(t.stripePaymentIntentId).where(sql`${t.stripePaymentIntentId} IS NOT NULL`),
+  index("checkout_attempts_account_created_idx").on(t.accountId, t.createdAt),
+  check("checkout_attempts_totals_nonnegative", sql`${t.subtotalMinor} >= 0 AND ${t.shippingMinor} >= 0 AND ${t.totalMinor} = ${t.subtotalMinor} + ${t.shippingMinor}`),
+]);
+
+export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  stripeEventId: text("stripe_event_id").notNull(),
+  eventType: text("event_type").notNull(),
+  checkoutAttemptId: uuid("checkout_attempt_id").references(() => checkoutAttempts.id, { onDelete: "set null" }),
+  processingStatus: stripeWebhookProcessingStatus("processing_status").default("received").notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+  failureCode: text("failure_code"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("stripe_webhook_events_event_unique").on(t.stripeEventId),
+  index("stripe_webhook_events_attempt_created_idx").on(t.checkoutAttemptId, t.createdAt),
 ]);

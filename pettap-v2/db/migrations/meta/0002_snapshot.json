@@ -1,6 +1,6 @@
 {
-  "id": "7f4535c1-1a69-4cc6-ab9d-ac18860a1a24",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "1dfe10b5-1f33-4786-a5d5-785b2747799b",
+  "prevId": "674d264c-b025-4314-aa9d-353be680805b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -79,15 +79,15 @@
         "activity_logs_account_id_accounts_id_fk": {
           "name": "activity_logs_account_id_accounts_id_fk",
           "tableFrom": "activity_logs",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -150,15 +150,15 @@
         "audit_logs_account_id_accounts_id_fk": {
           "name": "audit_logs_account_id_accounts_id_fk",
           "tableFrom": "audit_logs",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -229,15 +229,15 @@
         "emergency_contacts_pet_id_pets_id_fk": {
           "name": "emergency_contacts_pet_id_pets_id_fk",
           "tableFrom": "emergency_contacts",
-          "tableTo": "pets",
           "columnsFrom": [
             "pet_id"
           ],
+          "tableTo": "pets",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -276,15 +276,15 @@
         "future_orders_account_id_accounts_id_fk": {
           "name": "future_orders_account_id_accounts_id_fk",
           "tableFrom": "future_orders",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -324,10 +324,10 @@
       "uniqueConstraints": {
         "future_products_slug_unique": {
           "name": "future_products_slug_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "slug"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -383,15 +383,15 @@
         "lost_reports_pet_id_pets_id_fk": {
           "name": "lost_reports_pet_id_pets_id_fk",
           "tableFrom": "lost_reports",
-          "tableTo": "pets",
           "columnsFrom": [
             "pet_id"
           ],
+          "tableTo": "pets",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -436,15 +436,15 @@
         "medical_information_pet_id_pets_id_fk": {
           "name": "medical_information_pet_id_pets_id_fk",
           "tableFrom": "medical_information",
-          "tableTo": "pets",
           "columnsFrom": [
             "pet_id"
           ],
+          "tableTo": "pets",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -518,9 +518,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "nfc_tags_pet_idx": {
           "name": "nfc_tags_pet_idx",
@@ -534,47 +534,47 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "nfc_tags_account_id_accounts_id_fk": {
           "name": "nfc_tags_account_id_accounts_id_fk",
           "tableFrom": "nfc_tags",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "nfc_tags_pet_id_pets_id_fk": {
           "name": "nfc_tags_pet_id_pets_id_fk",
           "tableFrom": "nfc_tags",
-          "tableTo": "pets",
           "columnsFrom": [
             "pet_id"
           ],
+          "tableTo": "pets",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "nfc_tags_public_id_unique": {
           "name": "nfc_tags_public_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "public_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -623,15 +623,15 @@
         "notifications_account_id_accounts_id_fk": {
           "name": "notifications_account_id_accounts_id_fk",
           "tableFrom": "notifications",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -690,15 +690,15 @@
         "pet_photos_pet_id_pets_id_fk": {
           "name": "pet_photos_pet_id_pets_id_fk",
           "tableFrom": "pet_photos",
-          "tableTo": "pets",
           "columnsFrom": [
             "pet_id"
           ],
+          "tableTo": "pets",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -777,34 +777,34 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "pets_account_id_accounts_id_fk": {
           "name": "pets_account_id_accounts_id_fk",
           "tableFrom": "pets",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "pets_public_id_unique": {
           "name": "pets_public_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "public_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -867,24 +867,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "profiles_account_id_accounts_id_fk": {
           "name": "profiles_account_id_accounts_id_fk",
           "tableFrom": "profiles",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -929,15 +929,15 @@
         "settings_account_id_accounts_id_fk": {
           "name": "settings_account_id_accounts_id_fk",
           "tableFrom": "settings",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -995,28 +995,28 @@
         "tag_activations_tag_id_nfc_tags_id_fk": {
           "name": "tag_activations_tag_id_nfc_tags_id_fk",
           "tableFrom": "tag_activations",
-          "tableTo": "nfc_tags",
           "columnsFrom": [
             "tag_id"
           ],
+          "tableTo": "nfc_tags",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "tag_activations_account_id_accounts_id_fk": {
           "name": "tag_activations_account_id_accounts_id_fk",
           "tableFrom": "tag_activations",
-          "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1066,15 +1066,15 @@
         "vaccinations_pet_id_pets_id_fk": {
           "name": "vaccinations_pet_id_pets_id_fk",
           "tableFrom": "vaccinations",
-          "tableTo": "pets",
           "columnsFrom": [
             "pet_id"
           ],
+          "tableTo": "pets",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1098,10 +1098,10 @@
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},
