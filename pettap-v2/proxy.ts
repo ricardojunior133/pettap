@@ -4,11 +4,10 @@ import { updateSupabaseSession } from "@/lib/backend/supabase/proxy";
 
 const isComingSoonLaunch = process.env.NODE_ENV === "production" && process.env.PETTAP_COMING_SOON_MODE !== "false";
 
+// This production launch gate restricts unfinished public routes. The official
+// homepage remains public even when PETTAP_COMING_SOON_MODE is not configured.
 const publicPaths = new Set([
   "/",
-  "/contact",
-  "/privacy",
-  "/terms",
   "/robots.txt",
   "/sitemap.xml",
   "/opengraph-image",
