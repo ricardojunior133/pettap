@@ -8,13 +8,13 @@ const homepageSource = readFileSync(resolve(root, "app/page.tsx"), "utf8");
 const layoutSource = readFileSync(resolve(root, "app/layout.tsx"), "utf8");
 const proxySource = readFileSync(resolve(root, "proxy.ts"), "utf8");
 
-describe("premium homepage publication gate", () => {
-  it("renders the premium homepage at the root without Coming Soon metadata", () => {
-    expect(homepageSource).toContain('import HomePage from "@/components/landing/HomePage"');
-    expect(homepageSource).toContain("return <HomePage />");
-    expect(homepageSource).not.toContain("PremiumComingSoon");
-    expect(homepageSource).not.toContain("Coming Soon");
-    expect(layoutSource).not.toContain("Coming Soon");
+describe("Coming Soon publication gate", () => {
+  it("renders the approved Coming Soon homepage at the root", () => {
+    expect(homepageSource).toContain('import { PremiumComingSoon } from "@/components/coming-soon/PremiumComingSoon"');
+    expect(homepageSource).toContain("return <PremiumComingSoon />");
+    expect(homepageSource).not.toContain('components/landing/HomePage');
+    expect(homepageSource).toContain("PetTap | Coming Soon");
+    expect(layoutSource).toContain("PetTap | Coming Soon");
   });
 
   it("keeps only approved public routes available during the production launch gate", () => {
