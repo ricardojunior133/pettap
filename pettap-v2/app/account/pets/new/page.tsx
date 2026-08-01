@@ -1,0 +1,2 @@
+import { CustomerPetForm } from "@/features/account/components/customer-pet-form";
+export default function NewPetPage(){return <section><p className="text-xs font-semibold uppercase tracking-[.18em] text-neutral-500">Your companions</p><h1 className="mt-3 text-4xl font-semibold tracking-[-.06em]">Add a pet</h1><p className="mt-3 text-neutral-600">Their information stays private and can be updated anytime.</p><CustomerPetForm/></section>}

@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { boolean, check, index, integer, jsonb, pgEnum, pgTable, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -55,6 +55,11 @@ export const pets = pgTable("pets", {
   accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   species: text("species").notNull(),
+  breed: text("breed"),
+  birthDate: date("birth_date"),
+  sex: text("sex"),
+  weight: numeric("weight", { precision: 6, scale: 2 }),
+  colour: text("colour"),
   publicId: text("public_id").notNull(),
   publicProfileEnabled: boolean("public_profile_enabled").default(false).notNull(),
   archivedAt: timestamp("archived_at", { withTimezone: true }),
@@ -63,7 +68,10 @@ export const pets = pgTable("pets", {
   uniqueIndex("pets_public_id_unique").on(table.publicId),
   index("pets_account_idx").on(table.accountId),
   index("pets_account_archived_idx").on(table.accountId, table.archivedAt),
+  index("pets_account_created_idx").on(table.accountId, table.createdAt),
   index("pets_name_lower_idx").on(sql`lower(${table.name})`),
+  check("pets_sex_check", sql`${table.sex} IS NULL OR ${table.sex} IN ('male', 'female', 'unknown')`),
+  check("pets_weight_positive_check", sql`${table.weight} IS NULL OR ${table.weight} > 0`),
 ]);
 
 export const emergencyContacts = pgTable("emergency_contacts", {
