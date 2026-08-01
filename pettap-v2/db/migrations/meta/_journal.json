@@ -89,8 +89,36 @@
     {
       "idx": 12,
       "version": "7",
-      "when": 1785354431414,
+      "when": 1785653700001,
       "tag": "0012_nfc_tag_credential_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1785653700002,
+      "tag": "0013_nfc_physical_provisioning_contract",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1785653700003,
+      "tag": "0014_canonical_lost_mode_data_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1785653700004,
+      "tag": "0015_contact_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1785653700005,
+      "tag": "0016_contact_request_notification_foundation",
       "breakpoints": true
     }
   ]

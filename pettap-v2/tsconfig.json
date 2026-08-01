@@ -37,6 +37,7 @@
                     "app/admin/event-demo/**/*.ts",
                     "app/admin/event-demo/**/*.tsx",
                     "app/api/admin/event-demo/**/*.ts",
+                    "app/api/internal/contact-request-notifications/**/*.ts",
                     "components/coming-soon/PremiumComingSoon.tsx",
                     "components/event-demo/**/*.ts",
                     "components/event-demo/**/*.tsx",
@@ -96,6 +97,8 @@
                     "features/account/repositories/customer-notification-repository.ts",
                     "features/account/services/customer-notification-service.ts",
                     "features/account/actions/customer-notification-actions.ts"
+                    ,"features/contact-request-notifications/**/*.ts"
+                    ,"tests/contact-request-notification*.test.ts"
                     ,"features/account/repositories/customer-pet-foundation-repository.ts"
                     ,"features/account/repositories/customer-tag-foundation-repository.ts"
                     ,"features/account/repositories/customer-tag-activation-foundation-repository.ts"

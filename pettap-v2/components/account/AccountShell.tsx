@@ -6,6 +6,7 @@ const navigation = [
   { href: "/account", label: "Overview" },
   { href: "/account/orders", label: "Orders" },
   { href: "/account/notifications", label: "Notifications" },
+  { href: "/account/contact-requests", label: "Finder inbox" },
   { href: "/account/profile", label: "Profile" },
 ] as const;
 
