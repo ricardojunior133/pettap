@@ -25,6 +25,10 @@ describe("contact request delivery providers", () => {
     expect(calls[0][1]).toEqual({ idempotencyKey: email.idempotencyKey });
   });
 
+  it("initializes the production adapter without evaluating a parameter property too early", () => {
+    expect(() => new ResendContactNotificationProvider({ apiKey: "test-key", from: "PetTap <hello@pettap.co.uk>" })).not.toThrow();
+  });
+
   it("does not expose a real recipient or body through the Console provider log", async () => {
     const log = console.info; const calls: unknown[][] = []; console.info = (...args: unknown[]) => { calls.push(args); };
     try { await new ConsoleContactNotificationProvider().send(email); } finally { console.info = log; }

@@ -13,11 +13,14 @@ export class ResendContactNotificationProviderError extends Error {
 /** Server-only adapter around the official Resend SDK. It never logs payloads. */
 export class ResendContactNotificationProvider implements ContactNotificationProvider {
   readonly name = "resend";
+  private readonly client: ResendContactNotificationClient;
 
   constructor(
     private readonly options: { apiKey: string; from: string; replyTo?: string },
-    private readonly client: ResendContactNotificationClient = new Resend(options.apiKey),
-  ) {}
+    client?: ResendContactNotificationClient,
+  ) {
+    this.client = client ?? new Resend(options.apiKey);
+  }
 
   async send(email: ContactNotificationEmail) {
     const { data, error } = await this.client.emails.send({
