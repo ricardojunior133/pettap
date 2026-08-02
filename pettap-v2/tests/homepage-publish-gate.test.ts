@@ -30,12 +30,18 @@ describe("Coming Soon publication gate", () => {
     expect(proxySource).not.toContain('"/terms",');
   });
 
+  it("allows only the canonical public NFC resolver while keeping internal NFC routes gated", () => {
+    expect(proxySource).toContain('pathname.startsWith("/nfc/v1/t/")');
+    expect(proxySource).not.toContain('pathname.startsWith("/nfc/")');
+    expect(proxySource).toContain("isCanonicalPublicNfcRoute");
+  });
+
   it("keeps Event Demo public and account and admin routes protected before the launch gate", () => {
     expect(proxySource).toContain('pathname === "/event" || pathname.startsWith("/event/")');
     expect(proxySource).toContain('pathname === "/admin" || pathname.startsWith("/admin/")');
     expect(proxySource).toContain('pathname === "/account" || pathname.startsWith("/account/")');
     expect(proxySource).toContain('return NextResponse.redirect(new URL("/login", request.url))');
-    expect(proxySource).toContain('if (!isComingSoonLaunch || publicPaths.has(pathname)) return NextResponse.next()');
+    expect(proxySource).toContain("if (!isComingSoonLaunch || publicPaths.has(pathname) || isCanonicalPublicNfcRoute)");
     expect(proxySource).toContain('return NextResponse.redirect(new URL("/", request.url))');
   });
 });

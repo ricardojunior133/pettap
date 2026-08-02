@@ -45,7 +45,13 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (!isComingSoonLaunch || publicPaths.has(pathname)) return NextResponse.next();
+  // Only the public tag resolver is available while the production launch gate
+  // is active. Keep the rest of /nfc private for future internal routes.
+  const isCanonicalPublicNfcRoute = pathname.startsWith("/nfc/v1/t/");
+
+  if (!isComingSoonLaunch || publicPaths.has(pathname) || isCanonicalPublicNfcRoute) {
+    return NextResponse.next();
+  }
   return NextResponse.redirect(new URL("/", request.url));
 }
 
