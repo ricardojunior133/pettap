@@ -134,6 +134,13 @@
       "when": 1785661680790,
       "tag": "0018_pet_public_profile_message",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1785671341762,
+      "tag": "0019_contact_request_consent_and_idempotency",
+      "breakpoints": true
     }
   ]
 }

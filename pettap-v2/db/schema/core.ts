@@ -270,11 +270,13 @@ export const contactRequests = pgTable("contact_requests", {
   finderContact: text("finder_contact").notNull(),
   message: text("message").notNull(),
   actorHash: text("actor_hash").notNull(),
+  finderConsentAcceptedAt: timestamp("finder_consent_accepted_at", { withTimezone: true }),
   processedAt: timestamp("processed_at", { withTimezone: true }),
   resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   ...timestamps,
 }, (table) => [
   index("contact_requests_lost_report_idx").on(table.lostReportId),
+  uniqueIndex("contact_requests_lost_report_actor_hash_unique").on(table.lostReportId, table.actorHash),
   index("contact_requests_tag_status_created_idx").on(table.tagId, table.status, table.createdAt),
   index("contact_requests_pet_status_created_idx").on(table.petId, table.status, table.createdAt),
   check("contact_requests_processed_after_created", sql`${table.processedAt} IS NULL OR ${table.processedAt} >= ${table.createdAt}`),

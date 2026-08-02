@@ -1,0 +1,2 @@
+ALTER TABLE "contact_requests" ADD COLUMN "finder_consent_accepted_at" timestamp with time zone;--> statement-breakpoint
+CREATE UNIQUE INDEX "contact_requests_lost_report_actor_hash_unique" ON "contact_requests" USING btree ("lost_report_id","actor_hash");

@@ -17,7 +17,7 @@ export async function submitContactRequestAction(_previous:ContactRequestActionS
   try{
     if(!await isSameOriginRequest())return initialFailure;
     if(String(formData.get("website")??"").trim()){await service.recordInvalidAttempt();return {ok:true,message:"Your message has been sent to the pet owner."}}
-    const input=createContactRequestSchema.parse({publicCode:formData.get("publicCode"),finderName:formData.get("finderName"),finderContact:formData.get("finderContact"),message:formData.get("message")});
+    const input=createContactRequestSchema.parse({publicCode:formData.get("publicCode"),finderName:formData.get("finderName"),finderEmail:formData.get("finderEmail"),message:formData.get("message"),consent:formData.get("consent")});
     await service.create(input,fingerprint(await headers()));
     return {ok:true,message:"Your message has been sent to the pet owner."};
   }catch{return initialFailure}
