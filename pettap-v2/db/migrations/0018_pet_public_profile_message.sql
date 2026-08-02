@@ -1,0 +1,2 @@
+ALTER TABLE "pet_public_preferences" ADD COLUMN "public_message" text;--> statement-breakpoint
+ALTER TABLE "pet_public_preferences" ADD CONSTRAINT "pet_public_preferences_public_message_length" CHECK (char_length("pet_public_preferences"."public_message") <= 280);

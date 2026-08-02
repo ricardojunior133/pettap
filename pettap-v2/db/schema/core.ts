@@ -247,13 +247,17 @@ export const petPublicPreferences = pgTable("pet_public_preferences", {
   showName: boolean("show_name").default(false).notNull(),
   showBreed: boolean("show_breed").default(false).notNull(),
   showAge: boolean("show_age").default(false).notNull(),
+  /** Owner-authored public copy only; Lost Mode's private report note is never reused here. */
+  publicMessage: text("public_message"),
   showMedicalConditions: boolean("show_medical_conditions").default(false).notNull(),
   showMedications: boolean("show_medications").default(false).notNull(),
   showPrimaryContact: boolean("show_primary_contact").default(false).notNull(),
   showEmergencyContacts: boolean("show_emergency_contacts").default(false).notNull(),
   showSpecialInstructions: boolean("show_special_instructions").default(false).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => [
+  check("pet_public_preferences_public_message_length", sql`char_length(${table.publicMessage}) <= 280`),
+]);
 
 /** Private finder input. This table is never selected by the public resolver. */
 export const contactRequests = pgTable("contact_requests", {

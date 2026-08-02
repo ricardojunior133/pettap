@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { auditLogs, lostReports, nfcTagStatusHistory, nfcTags, pets, tagActivations } from "@/db/schema";
 import type { NfcTagStatus } from "@/features/nfc/domain/tag-status";
@@ -10,9 +10,9 @@ type Database = ReturnType<typeof createDatabaseClient>;
 type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 export type LostModePet = { id: string; accountId: string };
-export type LostModeTag = { id: string; petId: string | null; accountId: string | null; status: NfcTagStatus };
+export type LostModeTag = { id: string; petId: string | null; accountId: string | null; status: NfcTagStatus; updatedAt: Date };
 export type OpenLostReport = { id: string; tagId: string | null; petId: string; actorAccountId: string | null };
-export type LostModeStatus = { tag: LostModeTag; report: OpenLostReport | null };
+export type LostModeStatus = { tag: LostModeTag; report: OpenLostReport | null; activationAt: Date | null };
 export type LostModeAudit = { action: "lost.enabled" | "lost.disabled" | "lost.enable_denied" | "lost.disable_denied" | "lost.inconsistent"; accountId: string; tagId: string | null; result?: "success" | "denied"; metadata: { petId: string; status?: NfcTagStatus; reason?: string } };
 
 export interface LostModeTransaction {
@@ -39,7 +39,7 @@ class DrizzleLostModeTransaction implements LostModeTransaction {
     return pet ?? null;
   }
   async findAssociatedTagForUpdate(accountId: string, petId: string) {
-    const [tag] = await this.tx.select({ id: nfcTags.id, petId: nfcTags.petId, accountId: nfcTags.accountId, status: nfcTags.status }).from(nfcTags).innerJoin(tagActivations, and(eq(tagActivations.tagId, nfcTags.id), eq(tagActivations.accountId, accountId), eq(tagActivations.status, "active"))).where(and(eq(nfcTags.petId, petId), eq(nfcTags.accountId, accountId))).for("update").limit(1);
+    const [tag] = await this.tx.select({ id: nfcTags.id, petId: nfcTags.petId, accountId: nfcTags.accountId, status: nfcTags.status, updatedAt: nfcTags.updatedAt }).from(nfcTags).innerJoin(tagActivations, and(eq(tagActivations.tagId, nfcTags.id), eq(tagActivations.accountId, accountId), eq(tagActivations.status, "active"))).where(and(eq(nfcTags.petId, petId), eq(nfcTags.accountId, accountId))).for("update").limit(1);
     return tag ? { ...tag, status: tag.status as NfcTagStatus } : null;
   }
   async findOpenReportForUpdate(tagId: string) {
@@ -57,9 +57,10 @@ export class DrizzleLostModeRepository implements LostModeRepository {
   async transaction<T>(petId: string, callback: (transaction: LostModeTransaction) => Promise<T>): Promise<T> { const database = createDatabaseClient(); return database.transaction(async (tx) => { await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${petId}))`); return callback(new DrizzleLostModeTransaction(tx)); }); }
   async getCurrentStatus(accountId: string, petId: string): Promise<LostModeStatus | null> {
     const database = createDatabaseClient();
-    const [tag] = await database.select({ id: nfcTags.id, petId: nfcTags.petId, accountId: nfcTags.accountId, status: nfcTags.status }).from(nfcTags).innerJoin(tagActivations, and(eq(tagActivations.tagId, nfcTags.id), eq(tagActivations.accountId, accountId), eq(tagActivations.status, "active"))).where(and(eq(nfcTags.petId, petId), eq(nfcTags.accountId, accountId))).limit(1);
+    const [tag] = await database.select({ id: nfcTags.id, petId: nfcTags.petId, accountId: nfcTags.accountId, status: nfcTags.status, updatedAt: nfcTags.updatedAt }).from(nfcTags).innerJoin(tagActivations, and(eq(tagActivations.tagId, nfcTags.id), eq(tagActivations.accountId, accountId), eq(tagActivations.status, "active"))).where(and(eq(nfcTags.petId, petId), eq(nfcTags.accountId, accountId))).limit(1);
     if (!tag) return null;
+    const [activation] = await database.select({ createdAt: tagActivations.createdAt }).from(tagActivations).where(and(eq(tagActivations.tagId, tag.id), eq(tagActivations.accountId, accountId), eq(tagActivations.status, "active"))).orderBy(desc(tagActivations.createdAt)).limit(1);
     const [report] = await database.select({ id: lostReports.id, tagId: lostReports.tagId, petId: lostReports.petId, actorAccountId: lostReports.actorAccountId }).from(lostReports).where(and(eq(lostReports.tagId, tag.id), eq(lostReports.status, "open"))).limit(1);
-    return { tag: { ...tag, status: tag.status as NfcTagStatus }, report: report ?? null };
+    return { tag: { ...tag, status: tag.status as NfcTagStatus }, report: report ?? null, activationAt: activation?.createdAt ?? null };
   }
 }

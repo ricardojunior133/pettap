@@ -6,7 +6,7 @@ import { DrizzleLostModeRepository, type LostModeAudit, type LostModeRepository,
 import type { DisableLostModeInput, EnableLostModeInput } from "../schemas/lost-mode";
 
 export type LostModeResult = { state: "enabled" | "disabled" | "already_enabled" | "already_disabled"; tagId: string };
-export type LostModeView = { state: "enabled" | "disabled"; tagId: string };
+export type LostModeView = { state: "enabled" | "disabled"; tagId: string; activationAt: string | null; updatedAt: string };
 
 export class LostModeDomainError extends Error {
   constructor(readonly code: "UNAUTHENTICATED" | "PET_NOT_FOUND" | "TAG_NOT_FOUND" | "TAG_NOT_ELIGIBLE" | "INCONSISTENT_STATE" | "CONCURRENT_UPDATE") { super("Unable to update Lost Mode."); }
@@ -73,7 +73,7 @@ export class LostModeService {
     const current = await this.repository.getCurrentStatus(accountId, petId);
     if (!current) return null;
     if ((current.tag.status === "lost") !== Boolean(current.report)) throw new LostModeDomainError("INCONSISTENT_STATE");
-    return { state: current.tag.status === "lost" ? "enabled" : "disabled", tagId: current.tag.id };
+    return { state: current.tag.status === "lost" ? "enabled" : "disabled", tagId: current.tag.id, activationAt: current.activationAt?.toISOString() ?? null, updatedAt: current.tag.updatedAt.toISOString() };
   }
 
   private async accountId(): Promise<string> {
