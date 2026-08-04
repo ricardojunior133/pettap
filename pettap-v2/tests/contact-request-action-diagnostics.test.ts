@@ -44,15 +44,43 @@ describe("contact request action diagnostics", () => {
   it("keeps validation failures generic while recording a correlation-safe stage", async () => {
     const test = setup();
     await expect(runContactRequestAction({ ok: false, message: "" }, form({ consent: "" }), test.dependencies)).resolves.toEqual({ ok: false, message: "We couldn't submit your request." });
-    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "validation", errorClass: "validation_error" }]);
+    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "action_input_parsing", errorClass: "validation_error" }]);
   });
 
   it("records an origin denial without inspecting or logging the submitted payload", async () => {
     const test = setup();
     test.dependencies.isSameOriginRequest = async () => false;
     await expect(runContactRequestAction({ ok: false, message: "" }, form(), test.dependencies)).resolves.toEqual({ ok: false, message: "We couldn't submit your request." });
-    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "unknown", errorClass: "unknown_error" }]);
+    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "same_origin_validation", errorClass: "unknown_error" }]);
     expect(JSON.stringify(test.logs)).not.toMatch(/Private Finder|finder@example|Private message|PT_private/);
+  });
+
+  it("records request context failures before the service is initialized", async () => {
+    const test = setup();
+    test.dependencies.requestHeaders = async () => { throw new Error("headers unavailable"); };
+    await expect(runContactRequestAction({ ok: false, message: "" }, form(), test.dependencies)).resolves.toEqual({ ok: false, message: "We couldn't submit your request." });
+    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "request_context_resolution", errorClass: "unknown_error" }]);
+  });
+
+  it("records service construction failures before invocation", async () => {
+    const test = setup();
+    test.dependencies.createService = () => { throw new Error("provider initialization failed"); };
+    await expect(runContactRequestAction({ ok: false, message: "" }, form(), test.dependencies)).resolves.toEqual({ ok: false, message: "We couldn't submit your request." });
+    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "service_initialization", errorClass: "unknown_error" }]);
+  });
+
+  it("records an invocation failure when no service stage has reported it", async () => {
+    const test = setup();
+    test.dependencies.createService = () => ({ recordInvalidAttempt: async () => undefined, create: async () => { throw new Error("unexpected invocation failure"); } });
+    await expect(runContactRequestAction({ ok: false, message: "" }, form(), test.dependencies)).resolves.toEqual({ ok: false, message: "We couldn't submit your request." });
+    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "service_invocation", errorClass: "unknown_error" }]);
+  });
+
+  it("records a malformed FormData reader without exposing submitted values", async () => {
+    const test = setup();
+    const malformed = { get: () => { throw new Error("form reader failed"); } } as unknown as FormData;
+    await expect(runContactRequestAction({ ok: false, message: "" }, malformed, test.dependencies)).resolves.toEqual({ ok: false, message: "We couldn't submit your request." });
+    expect(test.logs).toEqual([{ correlationId: "correlation-test", stage: "action_input_parsing", errorClass: "unknown_error" }]);
   });
 
   it("identifies a missing Lost report without returning details publicly", async () => {

@@ -9,9 +9,17 @@ import {
 } from "../services/contact-request-service";
 
 export type ContactRequestActionState = { ok: boolean; message: string };
+export type ContactRequestActionFailureStage =
+  | ContactRequestFailureStage
+  | "action_input_parsing"
+  | "same_origin_validation"
+  | "request_context_resolution"
+  | "service_initialization"
+  | "service_invocation"
+  | "unknown_pre_service";
 export type ContactRequestSafeFailureLog = {
   correlationId: string;
-  stage: ContactRequestFailureStage;
+  stage: ContactRequestActionFailureStage;
   errorClass: "validation_error" | "domain_error" | "unknown_error";
 };
 
@@ -43,7 +51,7 @@ export async function runContactRequestAction(
   dependencies: ContactRequestActionDependencies,
 ): Promise<ContactRequestActionState> {
   const correlationId = dependencies.createCorrelationId();
-  let stage: ContactRequestFailureStage = "unknown";
+  let stage: ContactRequestActionFailureStage = "unknown_pre_service";
   const diagnostics: ContactRequestDiagnosticListener = (diagnostic) => {
     stage = diagnostic.stage;
     // Notification enqueue failures are intentionally non-fatal after persistence.
@@ -53,17 +61,27 @@ export async function runContactRequestAction(
   };
 
   try {
-    if (!await dependencies.isSameOriginRequest()) {
-      dependencies.logFailure({ correlationId, stage: "unknown", errorClass: "unknown_error" });
+    try {
+      if (!await dependencies.isSameOriginRequest()) {
+        dependencies.logFailure({ correlationId, stage: "same_origin_validation", errorClass: "unknown_error" });
+        return initialFailure;
+      }
+    } catch (error) {
+      dependencies.logFailure({ correlationId, stage: "same_origin_validation", errorClass: safeErrorClass(error) });
       return initialFailure;
-    }
-    if (String(formData.get("website") ?? "").trim()) {
-      await dependencies.createService(diagnostics).recordInvalidAttempt();
-      return success;
     }
 
     let input;
     try {
+      if (String(formData.get("website") ?? "").trim()) {
+        let honeypotService;
+        try { honeypotService = dependencies.createService(diagnostics); } catch (error) {
+          dependencies.logFailure({ correlationId, stage: "service_initialization", errorClass: safeErrorClass(error) });
+          return initialFailure;
+        }
+        await honeypotService.recordInvalidAttempt();
+        return success;
+      }
       input = createContactRequestSchema.parse({
         publicCode: formData.get("publicCode"),
         finderName: formData.get("finderName"),
@@ -72,11 +90,24 @@ export async function runContactRequestAction(
         consent: formData.get("consent"),
       });
     } catch (error) {
-      dependencies.logFailure({ correlationId, stage: "validation", errorClass: safeErrorClass(error) });
+      dependencies.logFailure({ correlationId, stage: "action_input_parsing", errorClass: safeErrorClass(error) });
       return initialFailure;
     }
 
-    await dependencies.createService(diagnostics).create(input, fingerprint(await dependencies.requestHeaders()));
+    let actorFingerprint: string;
+    try { actorFingerprint = fingerprint(await dependencies.requestHeaders()); } catch (error) {
+      dependencies.logFailure({ correlationId, stage: "request_context_resolution", errorClass: safeErrorClass(error) });
+      return initialFailure;
+    }
+
+    let service;
+    try { service = dependencies.createService(diagnostics); } catch (error) {
+      dependencies.logFailure({ correlationId, stage: "service_initialization", errorClass: safeErrorClass(error) });
+      return initialFailure;
+    }
+
+    stage = "service_invocation";
+    await service.create(input, actorFingerprint);
     return success;
   } catch (error) {
     dependencies.logFailure({ correlationId, stage, errorClass: safeErrorClass(error) });
