@@ -5,12 +5,14 @@ import {
   ContactRequestError,
   type ContactRequestDiagnosticListener,
   type ContactRequestFailureStage,
+  type ContactRequestServiceInitializationStage,
   type ContactRequestService,
 } from "../services/contact-request-service";
 
 export type ContactRequestActionState = { ok: boolean; message: string };
 export type ContactRequestActionFailureStage =
   | ContactRequestFailureStage
+  | ContactRequestServiceInitializationStage
   | "action_input_parsing"
   | "same_origin_validation"
   | "request_context_resolution"

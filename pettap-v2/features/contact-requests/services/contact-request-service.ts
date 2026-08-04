@@ -2,8 +2,12 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 
-import { ContactRequestNotificationService } from "@/features/contact-request-notifications/contact-request-notification-service";
+import { ContactRequestNotificationService, resolveTutorEmail } from "@/features/contact-request-notifications/contact-request-notification-service";
+import { DrizzleContactRequestNotificationRepository, type ContactRequestNotificationRepository } from "@/features/contact-request-notifications/contact-request-notification-repository";
+import { getContactNotificationProvider } from "@/features/contact-request-notifications/provider-factory";
+import type { ContactNotificationProvider } from "@/features/contact-request-notifications/types";
 import { PublicTagRepository } from "@/features/nfc/repositories/public-tag-repository";
+import { getServerEnv, type ServerEnv } from "@/lib/backend/env";
 
 import { allowFinderContact } from "../contact-request-rate-limit";
 import { DrizzleContactRequestRepository, type ContactRequestRepository } from "../repositories/contact-request-repository";
@@ -19,7 +23,19 @@ export type ContactRequestResult = { accepted: true };
 type FingerprintHasher = (input: string) => string;
 export interface ContactRequestNotificationEnqueuer { enqueueForContactRequest(contactRequestId: string): Promise<unknown>; }
 export type ContactRequestFailureStage = "validation" | "public_tag_resolution" | "lost_report_resolution" | "actor_hash" | "rate_limit" | "contact_request_persistence" | "notification_enqueue" | "unknown";
-export type ContactRequestDiagnosticListener = (diagnostic: { stage: ContactRequestFailureStage; error: unknown }) => void;
+export type ContactRequestServiceInitializationStage = "contact_request_repository_initialization" | "public_tag_repository_initialization" | "notification_repository_initialization" | "provider_factory_initialization" | "notification_service_initialization" | "contact_request_service_construction" | "environment_access" | "unknown_service_initialization";
+export type ContactRequestDiagnosticStage = ContactRequestFailureStage | ContactRequestServiceInitializationStage;
+export type ContactRequestDiagnosticListener = (diagnostic: { stage: ContactRequestDiagnosticStage; error: unknown }) => void;
+
+export type ContactRequestServiceFactoryDependencies = {
+  createContactRequestRepository?: () => ContactRequestRepository;
+  createPublicTagRepository?: () => Pick<PublicTagRepository, "findByPublicCode">;
+  createNotificationRepository?: () => ContactRequestNotificationRepository;
+  createProvider?: () => ContactNotificationProvider;
+  readEnvironment?: () => Pick<ServerEnv, "NEXT_PUBLIC_SITE_URL">;
+  createNotificationService?: (repository: ContactRequestNotificationRepository, provider: ContactNotificationProvider, siteUrl: string) => ContactRequestNotificationEnqueuer;
+  createContactRequestService?: (contacts: ContactRequestRepository, tags: Pick<PublicTagRepository, "findByPublicCode">, notifications: ContactRequestNotificationEnqueuer, diagnostics: ContactRequestDiagnosticListener) => ContactRequestService;
+};
 
 /** Persists a private request only after the public Lost state is revalidated server-side. */
 export class ContactRequestService {
@@ -84,6 +100,42 @@ export class ContactRequestService {
   private report(stage: ContactRequestFailureStage, error: unknown) { this.diagnostics?.({ stage, error }); }
 }
 
-export function createDefaultContactRequestService(diagnostics: ContactRequestDiagnosticListener) {
-  return new ContactRequestService(undefined, undefined, undefined, undefined, undefined, undefined, diagnostics);
+function initialize<T>(
+  stage: ContactRequestServiceInitializationStage,
+  diagnostics: ContactRequestDiagnosticListener,
+  factory: () => T,
+): T {
+  try { return factory(); } catch (error) { diagnostics({ stage, error }); throw error; }
+}
+
+/** Explicit factory keeps server-only dependency construction observable without exposing configuration. */
+export function createDefaultContactRequestService(
+  diagnostics: ContactRequestDiagnosticListener,
+  dependencies: ContactRequestServiceFactoryDependencies = {},
+) {
+  let classified = false;
+  const factoryDiagnostics: ContactRequestDiagnosticListener = (entry) => { classified = true; diagnostics(entry); };
+  try {
+    const contacts = initialize("contact_request_repository_initialization", factoryDiagnostics, dependencies.createContactRequestRepository ?? (() => new DrizzleContactRequestRepository()));
+    const tags = initialize("public_tag_repository_initialization", factoryDiagnostics, dependencies.createPublicTagRepository ?? (() => new PublicTagRepository()));
+    const notificationRepository = initialize("notification_repository_initialization", factoryDiagnostics, dependencies.createNotificationRepository ?? (() => new DrizzleContactRequestNotificationRepository()));
+    const provider = initialize("provider_factory_initialization", factoryDiagnostics, dependencies.createProvider ?? getContactNotificationProvider);
+    const environment = initialize("environment_access", factoryDiagnostics, dependencies.readEnvironment ?? getServerEnv);
+    const notifications = initialize(
+      "notification_service_initialization",
+      factoryDiagnostics,
+      () => dependencies.createNotificationService?.(notificationRepository, provider, environment.NEXT_PUBLIC_SITE_URL)
+        ?? new ContactRequestNotificationService(notificationRepository, provider, resolveTutorEmail, environment.NEXT_PUBLIC_SITE_URL),
+    );
+    return initialize(
+      "contact_request_service_construction",
+      factoryDiagnostics,
+      () => dependencies.createContactRequestService?.(contacts, tags, notifications, diagnostics)
+        ?? new ContactRequestService(contacts, tags, undefined, undefined, notifications, undefined, diagnostics),
+    );
+  } catch (error) {
+    // A future expression outside the checkpoints remains safely observable.
+    if (!classified) diagnostics({ stage: "unknown_service_initialization", error });
+    throw error;
+  }
 }
