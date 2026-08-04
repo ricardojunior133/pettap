@@ -41,6 +41,12 @@ describe("public finder contact form", () => {
     expect(action).not.toMatch(/phone|actorHash|lostReportId|tagId|petId/);
   });
 
+  it("does not initialize notification dependencies during SSR module evaluation", () => {
+    const actionDeclaration = action.indexOf("export async function submitContactRequestAction");
+    expect(action.slice(0, actionDeclaration)).not.toContain("new ContactRequestService()");
+    expect(action.slice(actionDeclaration)).toContain("const service=new ContactRequestService();");
+  });
+
   it("keeps user-facing failures generic", () => {
     expect(action).toContain("We couldn't submit your request.");
     expect(action).not.toContain("ContactRequestError");
