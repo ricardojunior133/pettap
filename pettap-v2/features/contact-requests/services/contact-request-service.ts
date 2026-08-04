@@ -18,6 +18,8 @@ export class ContactRequestError extends Error {
 export type ContactRequestResult = { accepted: true };
 type FingerprintHasher = (input: string) => string;
 export interface ContactRequestNotificationEnqueuer { enqueueForContactRequest(contactRequestId: string): Promise<unknown>; }
+export type ContactRequestFailureStage = "validation" | "public_tag_resolution" | "lost_report_resolution" | "actor_hash" | "rate_limit" | "contact_request_persistence" | "notification_enqueue" | "unknown";
+export type ContactRequestDiagnosticListener = (diagnostic: { stage: ContactRequestFailureStage; error: unknown }) => void;
 
 /** Persists a private request only after the public Lost state is revalidated server-side. */
 export class ContactRequestService {
@@ -28,31 +30,38 @@ export class ContactRequestService {
     private readonly hash: FingerprintHasher = (value) => createHash("sha256").update(value).digest("hex"),
     private readonly notifications: ContactRequestNotificationEnqueuer = new ContactRequestNotificationService(),
     private readonly now = () => new Date(),
+    private readonly diagnostics?: ContactRequestDiagnosticListener,
   ) {}
 
   async create(input: CreateContactRequestInput, actorFingerprint: string): Promise<ContactRequestResult> {
     if (!this.rateLimit(actorFingerprint)) {
       await this.safeAudit({ action: "contact.request.denied", tagId: null, lostReportId: null, result: "denied", reason: "rate_limited" });
-      throw new ContactRequestError("RATE_LIMITED");
+      const error = new ContactRequestError("RATE_LIMITED"); this.report("rate_limit", error); throw error;
     }
 
-    const tag = await this.tags.findByPublicCode(input.publicCode);
+    let tag;
+    try { tag = await this.tags.findByPublicCode(input.publicCode); } catch (error) { this.report("public_tag_resolution", error); throw error; }
     const report = tag?.lostReport;
     if (!tag || tag.status !== "lost" || !tag.pet || !tag.petId || !tag.pet.publicProfileEnabled || !report || report.status !== "open" || report.petId !== tag.pet.id || report.tagId !== tag.tagId) {
       await this.safeAudit({ action: "contact.request.denied", tagId: tag?.tagId ?? null, lostReportId: report?.id ?? null, result: "denied", reason: "lost_state_unavailable" });
-      throw new ContactRequestError("UNAVAILABLE");
+      const error = new ContactRequestError("UNAVAILABLE"); this.report("lost_report_resolution", error); throw error;
     }
 
-    const created = await this.contacts.createContactRequest({
-      lostReportId: report.id,
-      petId: tag.pet.id,
-      tagId: tag.tagId,
-      finderName: input.finderName,
-      finderContact: input.finderEmail,
-      message: input.message,
-      actorHash: this.hash(actorFingerprint),
-      finderConsentAcceptedAt: this.now(),
-    });
+    let actorHash: string;
+    try { actorHash = this.hash(actorFingerprint); } catch (error) { this.report("actor_hash", error); throw error; }
+    let created;
+    try {
+      created = await this.contacts.createContactRequest({
+        lostReportId: report.id,
+        petId: tag.pet.id,
+        tagId: tag.tagId,
+        finderName: input.finderName,
+        finderContact: input.finderEmail,
+        message: input.message,
+        actorHash,
+        finderConsentAcceptedAt: this.now(),
+      });
+    } catch (error) { this.report("contact_request_persistence", error); throw error; }
 
     if (!created.created) {
       await this.safeAudit({ action: "contact.request.duplicate", tagId: tag.tagId, lostReportId: report.id, result: "denied", reason: "idempotent_reuse" });
@@ -60,7 +69,7 @@ export class ContactRequestService {
 
     // The notification outbox has its own unique key. Retrying a finder submission
     // can therefore recover a queue fault without creating a second email job.
-    try { await this.notifications.enqueueForContactRequest(created.record.id); } catch { /* inbox remains the canonical fallback */ }
+    try { await this.notifications.enqueueForContactRequest(created.record.id); } catch (error) { this.report("notification_enqueue", error); /* inbox remains the canonical fallback */ }
     return { accepted: true };
   }
 
@@ -71,4 +80,10 @@ export class ContactRequestService {
   private async safeAudit(event: Parameters<ContactRequestRepository["recordAudit"]>[0]) {
     try { await this.contacts.recordAudit(event); } catch { /* public caller receives the same safe result */ }
   }
+
+  private report(stage: ContactRequestFailureStage, error: unknown) { this.diagnostics?.({ stage, error }); }
+}
+
+export function createDefaultContactRequestService(diagnostics: ContactRequestDiagnosticListener) {
+  return new ContactRequestService(undefined, undefined, undefined, undefined, undefined, undefined, diagnostics);
 }
