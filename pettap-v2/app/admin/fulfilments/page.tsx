@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { AdminOrderService } from "@/features/admin/orders/services/admin-order-service";
+
+export default async function AdminFulfilmentsPage() { const fulfilments = await new AdminOrderService().fulfilments(); return <><header><p className="text-xs font-semibold uppercase tracking-[.18em] text-neutral-500">Operations</p><h1 className="mt-3 text-3xl font-semibold tracking-[-.05em] sm:text-5xl">Fulfilments</h1></header><section className="mt-8 rounded-3xl border border-black/[.07] bg-white">{fulfilments.length ? fulfilments.map((item) => <Link className="flex justify-between border-b border-black/[.06] p-5 last:border-0" href={`/admin/fulfilments/${item.id}`} key={item.id}><span className="font-semibold">{item.provider ?? "Fulfilment"}</span><span className="text-sm capitalize text-neutral-600">{item.status}</span></Link>) : <p className="p-10 text-center text-sm text-neutral-600">No fulfilments have been created.</p>}</section></>; }

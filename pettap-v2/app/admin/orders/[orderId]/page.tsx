@@ -1,0 +1,34 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { AdminOrderNotes, AdminOrderOperations } from "@/features/admin/orders/components/admin-order-operations";
+import { formatAdminMoney, formatFulfilmentStatus, parseAdminPersonalisation } from "@/features/admin/orders/services/admin-order-domain";
+import { AdminOrderNotFoundError, AdminOrderService } from "@/features/admin/orders/services/admin-order-service";
+
+async function loadOrder(orderId: string) {
+  try { return await new AdminOrderService().detail(orderId); } catch (error) { if (error instanceof AdminOrderNotFoundError) notFound(); throw error; }
+}
+
+function date(value: Date | null) { return value ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(value) : "—"; }
+function address(value: unknown): string[] {
+  if (!value || typeof value !== "object") return ["No shipping address captured."];
+  const item = value as Record<string, unknown>;
+  return [item.fullName, item.company, item.addressLine1, item.addressLine2, [item.city, item.county].filter(Boolean).join(", "), item.postcode, item.countryCode].filter(Boolean).map(String);
+}
+
+export default async function AdminOrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const { orderId } = await params; const detail = await loadOrder(orderId); const { order } = detail;
+  const currentFulfilment = detail.fulfilments[0]?.status ?? "unfulfilled";
+  return <>
+    <header className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.18em] text-neutral-500">Order</p><h1 className="mt-3 text-3xl font-semibold tracking-[-.05em] sm:text-5xl">{order.orderNumber}</h1><p className="mt-3 text-neutral-600">Created {date(order.createdAt)} · {formatFulfilmentStatus(currentFulfilment)}</p></div><Link className="min-h-11 rounded-xl border border-black/10 px-4 py-3 text-sm font-semibold" href={`/admin/orders/${order.id}/production-sheet`}>Print production sheet</Link></header>
+    <div className="mt-8 grid gap-6 xl:grid-cols-[1.5fr_0.8fr]">
+      <div className="space-y-6">
+        <section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Products & personalisation</h2><div className="mt-4 space-y-5">{detail.items.map((item) => { const personalisation = parseAdminPersonalisation(item.personalisation); return <article className="border-t border-black/[.06] pt-4" key={item.id}><p className="font-medium">{item.productName} · {item.variantName}</p><p className="mt-1 text-sm text-neutral-600">{item.sku} · Quantity {item.quantity} · {formatAdminMoney(item.unitPriceMinor, item.currency)} each · {formatAdminMoney(item.lineTotalMinor, item.currency)}</p>{personalisation ? <dl className="mt-3 grid grid-cols-2 gap-x-5 gap-y-2 text-sm text-neutral-600 sm:grid-cols-3">{Object.entries(personalisation).filter(([, value]) => Boolean(value)).map(([label, value]) => <div key={label}><dt className="capitalize text-neutral-400">{label}</dt><dd>{String(value)}</dd></div>)}</dl> : null}</article>; })}</div></section>
+        <section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Customer & shipping</h2><div className="mt-4 grid gap-5 sm:grid-cols-2"><div><p className="text-sm text-neutral-500">Customer</p><p className="mt-1 font-medium">{order.customerName}</p><p className="text-sm text-neutral-600">{order.customerEmail}</p>{order.customerId ? <p className="mt-2 text-xs text-neutral-400">Customer ID: {order.customerId}</p> : null}</div><address className="not-italic"><p className="text-sm text-neutral-500">Shipping address</p>{address(order.shippingAddressSnapshot).map((line) => <p className="text-sm text-neutral-700" key={line}>{line}</p>)}</address></div></section>
+        <section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Payment & checkout</h2><dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2"><div><dt className="text-neutral-500">Payment</dt><dd>{detail.payments[0] ? `${detail.payments[0].provider} · ${detail.payments[0].providerPaymentId ?? "ID pending"}` : "No payment record"}</dd><dd className="text-neutral-600">{detail.payments[0] ? `${detail.payments[0].status} · ${date(detail.payments[0].paidAt)}` : null}</dd></div><div><dt className="text-neutral-500">Checkout</dt><dd>{detail.checkoutAttempt?.checkoutReference ?? "No checkout attempt"}</dd><dd className="break-all text-neutral-600">{detail.checkoutAttempt?.stripeCheckoutSessionId ?? "Session pending"}</dd><dd className="break-all text-neutral-600">{detail.checkoutAttempt?.stripePaymentIntentId ?? "Payment intent pending"}</dd></div></dl></section>
+        <section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Operational timeline</h2><ol className="mt-4 space-y-4">{detail.statusHistory.length ? detail.statusHistory.map((entry) => <li className="border-l-2 border-neutral-200 pl-4 text-sm" key={entry.id}><p className="font-medium">{entry.previousStatus ?? "Created"} → {entry.newStatus}</p><p className="text-neutral-500">{date(entry.createdAt)}{entry.reason ? ` · ${entry.reason}` : ""}</p></li>) : <li className="text-sm text-neutral-500">No operational changes recorded yet.</li>}</ol></section>
+      </div>
+      <aside className="space-y-6"><section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Order total</h2><dl className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{formatAdminMoney(order.subtotalMinor, order.currency)}</dd></div><div className="flex justify-between"><dt>Shipping</dt><dd>{formatAdminMoney(order.shippingTotalMinor, order.currency)}</dd></div><div className="flex justify-between border-t pt-3 font-semibold"><dt>Total</dt><dd>{formatAdminMoney(order.grandTotalMinor, order.currency)}</dd></div><div className="flex justify-between text-neutral-500"><dt>Payment status</dt><dd>{order.paymentStatus}</dd></div></dl></section><section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Fulfilment</h2><p className="mt-2 text-sm text-neutral-600">{formatFulfilmentStatus(currentFulfilment)}</p><div className="mt-4"><AdminOrderOperations orderId={order.id} fulfilmentStatus={currentFulfilment} /></div></section><section className="rounded-3xl border border-black/[.07] bg-white p-6"><h2 className="font-semibold">Internal notes</h2><div className="mt-4 space-y-3">{detail.notes.map((note) => <article className="rounded-xl bg-neutral-50 p-3 text-sm" key={note.id}><p>{note.body}</p><p className="mt-2 text-xs text-neutral-500">{date(note.createdAt)}</p></article>)}</div><AdminOrderNotes orderId={order.id} /></section></aside>
+    </div>
+  </>;
+}
