@@ -13,7 +13,7 @@ export const mockDashboard: DashboardData = {
   ],
   pets: [
     { id: "charlie", name: "Charlie", breed: "Golden Retriever", age: "3 years old", photo: "/images/pets/charlie.jpg", tagStatus: "active", lostMode: false },
-    { id: "luna", name: "Luna", breed: "British Shorthair", age: "2 years old", photo: "/images/hero/cat.png", tagStatus: "active", lostMode: false },
+    { id: "luna", name: "Luna", breed: "British Shorthair", age: "2 years old", photo: "/images/hero/cat.webp", tagStatus: "active", lostMode: false },
   ],
   quickActions: [
     { title: "Register new tag", description: "Connect a new PetTap to your family.", icon: "tag", href: "/dashboard/activate" },

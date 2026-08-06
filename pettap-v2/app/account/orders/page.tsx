@@ -1,0 +1,4 @@
+import { CustomerOrdersList } from "@/features/commerce/components/CustomerOrders";
+import { CustomerOrderService } from "@/features/commerce/services/customer-order-service";
+
+export default async function AccountOrdersPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) { const { page, q } = await searchParams; const data = await new CustomerOrderService().list({ page: Number(page) || 1, query: q }); return <section><header><p className="text-xs font-semibold uppercase tracking-[.18em] text-neutral-500">Your purchases</p><h1 className="mt-3 text-3xl font-semibold tracking-[-.05em] sm:text-5xl">My Orders</h1><p className="mt-4 text-base leading-7 text-neutral-600">Follow every stage of your PetTap order.</p></header><div className="mt-9"><CustomerOrdersList data={data} basePath="/account/orders" /></div></section>; }

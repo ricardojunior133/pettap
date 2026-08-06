@@ -1,0 +1,2 @@
+"use client";
+export default function DashboardError({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <section className="mx-auto max-w-xl rounded-3xl border border-black/[.07] bg-white p-8 text-center"><h1 className="text-2xl font-semibold tracking-[-.04em]">We couldn’t load your dashboard right now.</h1><p className="mt-3 text-neutral-600">Please try again in a moment.</p><button className="mt-6 min-h-12 rounded-xl bg-neutral-950 px-5 text-sm font-semibold text-white" onClick={reset} type="button">Try again</button></section>; }

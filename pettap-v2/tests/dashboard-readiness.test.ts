@@ -1,0 +1,3 @@
+import { describe, expect, it } from "vitest";
+import { calculatePetReadiness } from "@/features/dashboard/readiness";
+describe("pet readiness", () => { it("keeps an empty profile at zero with the next useful action", () => { const result = calculatePetReadiness({ hasPhoto: false, hasEmergencyContact: false, hasActiveTag: false, hasMedicalProfile: false }); expect(result.percentage).toBe(0); expect(result.nextRecommendedAction).toBe("Add a photo"); }); it("caps a complete profile at one hundred", () => { const result = calculatePetReadiness({ hasPhoto: true, hasEmergencyContact: true, hasActiveTag: true, hasMedicalProfile: true }); expect(result.percentage).toBe(100); expect(result.missingItems).toEqual([]); }); });

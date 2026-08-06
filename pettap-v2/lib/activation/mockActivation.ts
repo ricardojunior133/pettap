@@ -4,8 +4,8 @@ export const mockActivation: ActivationData = {
   tag: { id: "PT-4H7K-92XP", activationCode: "PT-4H7K-92XP", lifecycleStatus: "unactivated" },
   pets: [
     { id: "charlie", name: "Charlie", breed: "Golden Retriever", age: "3 years old", photo: "/images/pets/charlie.jpg", publicProfileHref: "/pet/7F4K92X" },
-    { id: "luna", name: "Luna", breed: "British Shorthair", age: "2 years old", photo: "/images/hero/cat.png" },
-    { id: "bella", name: "Bella", breed: "Pug", age: "1 year old", photo: "/images/hero/pug.png" },
+    { id: "luna", name: "Luna", breed: "British Shorthair", age: "2 years old", photo: "/images/hero/cat.webp" },
+    { id: "bella", name: "Bella", breed: "Pug", age: "1 year old", photo: "/images/hero/pug.webp" },
   ],
   content: {
     welcome: { title: "Activate your new PetTap", description: "You’re only a few steps away from protecting your best friend.", action: "Get started" },

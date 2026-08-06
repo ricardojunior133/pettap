@@ -1,0 +1,8 @@
+import Link from "next/link";
+import { ChevronRight, PawPrint } from "lucide-react";
+
+import type { Pet } from "../types/pet";
+
+export function PetCard({ pet }: { pet: Pet }) {
+  return <article className="group rounded-[24px] border border-black/[0.07] bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.035)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_38px_rgba(0,0,0,0.07)]"><div className="flex items-start gap-4"><span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-600"><PawPrint className="size-5" aria-hidden="true" /></span><div className="min-w-0 flex-1"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{pet.species}</p><h2 className="mt-1 truncate text-xl font-semibold tracking-[-0.04em] text-neutral-950">{pet.name}</h2><p className="mt-2 text-sm leading-6 text-neutral-600">Profile ready for the next setup steps.</p></div></div><div className="mt-5 flex items-center justify-between border-t border-black/[0.06] pt-4"><Link className="inline-flex min-h-10 items-center gap-1 rounded-xl px-3 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-950/10" href={`/dashboard/pets/${pet.id}`}>View pet <ChevronRight className="size-4" aria-hidden="true" /></Link><Link className="inline-flex min-h-10 items-center rounded-xl px-3 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-950/10" href={`/dashboard/pets/${pet.id}/edit`}>Edit</Link></div></article>;
+}
