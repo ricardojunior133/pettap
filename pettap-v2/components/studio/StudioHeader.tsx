@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useStudio } from "./StudioContext";
 
 export default function StudioHeader() {
@@ -25,7 +26,7 @@ export default function StudioHeader() {
           </p>
         </div>
 
-        <button type="button" onClick={resetStudio} className="min-h-10 rounded-xl px-3 text-xs font-semibold text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 sm:text-sm">Start again</button>
+        <Button type="button" variant="ghost" size="sm" onClick={resetStudio} leftIcon={<RotateCcw className="size-3.5" />}>Start again</Button>
       </div>
     </header>
   );

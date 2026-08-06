@@ -1,6 +1,8 @@
 import { TAG_SPEC, TagSize } from "@/lib/tag-spec";
 import type { TagDesign } from "@/types/tag";
 import { getTagOutline } from "./shapes/SignatureTag";
+import EssentialTag from "./shapes/EssentialTag";
+import { isEssentialShapeId } from "@/lib/studio/essential-shapes";
 
 interface TagBackPreviewProps {
   size: TagSize;
@@ -11,6 +13,7 @@ interface TagBackPreviewProps {
 export default function TagBackPreview({ size, colour, design }: TagBackPreviewProps) {
   const spec = TAG_SPEC[size];
   const diameter = spec.diameter * 6;
+  if (isEssentialShapeId(design)) return <EssentialTag colour={colour} design={design} diameter={diameter} engravingFont="classic" engravingIcon="none" petName="" side="back" />;
   const shape = getTagOutline(design, diameter);
   const textColour = colour === "#111111" ? "#ffffff" : "#111111";
 
