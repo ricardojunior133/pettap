@@ -1,14 +1,6 @@
 export type TagSize = "petite" | "classic" | "explorer";
-export type TagDesign =
-  | "classic-round"
-  | "dog-bone"
-  | "cat-paw"
-  | "heart"
-  | "shield"
-  | "hexagon"
-  | "military"
-  | "premium"
-  | "luxury";
+/** A catalogue model ID. IDs are collection-prefixed outside Essential. */
+export type TagDesign = string;
 export type EngravingFont = "classic" | "rounded" | "modern" | "editorial" | "monogram";
 export type EngravingIcon = "none" | "paw" | "heart" | "star" | "bone" | "fish" | "leaf" | "moon" | "crown" | "diamond" | "cat" | "flower";
 export type TagMaterial = "PETG";
@@ -20,7 +12,9 @@ export interface PetTagConfiguration {
   design: TagDesign;
   size: TagSize;
   colour: string;
+  lineColour: string;
   collection: string | null;
+  season?: "christmas" | "halloween" | "easter";
   material: TagMaterial;
   finish: TagFinish;
   engravingFont: EngravingFont;

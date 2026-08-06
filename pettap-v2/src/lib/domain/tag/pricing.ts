@@ -1,11 +1,12 @@
 import type { PetTagConfiguration } from "./types";
 import type { TagSize } from "@/types/tag";
 
-const PRICE = {
+/** The single source of truth for base PetTap size prices. */
+export const TAG_PRICE_BY_SIZE = {
   petite: 19.99,
   classic: 24.99,
   explorer: 29.99,
-};
+} as const;
 
 export function getTagPrice(
   config: PetTagConfiguration
@@ -14,5 +15,5 @@ export function getTagPrice(
 }
 
 export function getPriceForSize(size: TagSize) {
-  return PRICE[size];
+  return TAG_PRICE_BY_SIZE[size];
 }

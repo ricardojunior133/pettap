@@ -9,6 +9,8 @@ export const DEFAULT_CONFIGURATION: PetTagConfiguration = {
 
   colour: "#111111",
 
+  lineColour: "#F5F5F5",
+
   collection: null,
 
   material: "PETG",
