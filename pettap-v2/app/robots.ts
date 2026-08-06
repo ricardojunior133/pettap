@@ -1,14 +1,14 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = "https://pettap.co.uk";
+import { siteConfig } from "@/lib/config/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/dashboard", "/checkout", "/pets", "/preview", "/studio", "/pet", "/profile", "/orders", "/settings", "/shipping", "/returns"],
+      disallow: ["/account", "/activate", "/admin", "/api", "/auth", "/checkout", "/dashboard", "/event", "/help", "/login", "/orders", "/pet", "/pets", "/preview", "/profile", "/register", "/scan", "/settings", "/studio", "/track"],
     },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${siteConfig.url}/sitemap.xml`,
   };
 }

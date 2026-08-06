@@ -24,7 +24,7 @@ export default function HowItWorks() {
           eyebrow="01 • LOST"
           title="If your pet gets lost, PetTap is already working."
           description="Your pet keeps wearing the tag, waiting for someone kind enough to help."
-          image="/images/story/lost.png"
+          image="/images/story/lost.webp"
         />
 
         <StorySection
@@ -32,14 +32,14 @@ export default function HowItWorks() {
           eyebrow="02 • TAP"
           title="One tap. No apps. No delays."
           description="Anyone with a modern smartphone can instantly access your pet&apos;s profile using NFC."
-          image="/images/story/tap.png"
+          image="/images/story/tap.webp"
         />
 
         <StorySection
           eyebrow="03 • CONTACT"
           title="The finder contacts you in seconds."
           description="Your contact details are available immediately, making the reunion as fast as possible."
-          image="/images/story/contact.png"
+          image="/images/story/contact.webp"
         />
 
         <StorySection
@@ -47,7 +47,7 @@ export default function HowItWorks() {
           eyebrow="04 • HOME"
           title="Back where they belong."
           description="The best notification you&apos;ll ever receive is knowing your best friend is coming home."
-          image="/images/story/home.png"
+          image="/images/story/home.webp"
         />
       </Container>
     </section>

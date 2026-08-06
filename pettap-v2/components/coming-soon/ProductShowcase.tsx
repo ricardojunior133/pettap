@@ -1,119 +1,58 @@
 "use client";
 
-import Image from "next/image";
-import { type KeyboardEvent, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Check, Radio, ShieldCheck, type LucideIcon } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useState } from "react";
+import Link from "next/link";
 
-import { cn } from "@/lib/utils";
+import Card from "@/components/ui/Card";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { motionTokens, premiumEase } from "@/lib/theme/motion";
+import { spacing } from "@/lib/theme/spacing";
 
-import {
-  COMING_SOON_PRODUCT_COLOURS,
-  type ComingSoonProductColour,
-} from "./productColours";
+import PersonalisationControls from "./PersonalisationControls";
+import ProductPreview from "./ProductPreview";
+import type { ProductAccentColour, ProductName, ProductPrimaryColour, ProductShape, ProductSide, ProductSize } from "./productShowcaseOptions";
+
+const productFeatures: readonly { title: string; description: string; icon: LucideIcon }[] = [
+  { title: "Personalised name", description: "Made unmistakably theirs.", icon: Check },
+  { title: "Everyday material", description: "Lightweight and comfortable to wear.", icon: ShieldCheck },
+  { title: "Matte finish", description: "A calm, considered look.", icon: Check },
+  { title: "Built-in NFC", description: "A simple tap opens the profile you choose to share.", icon: Radio },
+];
 
 export default function ProductShowcase() {
-  const [selectedColour, setSelectedColour] = useState<ComingSoonProductColour>(
-    COMING_SOON_PRODUCT_COLOURS[0],
-  );
+  const [name, setName] = useState<ProductName>("Charlie");
+  const [shape, setShape] = useState<ProductShape>("Round");
+  const [primaryColour, setPrimaryColour] = useState<ProductPrimaryColour>("black");
+  const [accentColour, setAccentColour] = useState<ProductAccentColour>("white");
+  const [size, setSize] = useState<ProductSize>("Classic");
+  const [side, setSide] = useState<ProductSide>("front");
   const reducedMotion = useReducedMotion();
-  const crossfadeTransition = {
-    duration: reducedMotion ? 0 : 0.3,
-    ease: "easeInOut" as const,
-  };
-
-  function selectColourAt(index: number) {
-    const count = COMING_SOON_PRODUCT_COLOURS.length;
-    setSelectedColour(COMING_SOON_PRODUCT_COLOURS[(index + count) % count]);
-  }
-
-  function handleColourKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      event.preventDefault();
-      selectColourAt(index + 1);
-      return;
-    }
-
-    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      event.preventDefault();
-      selectColourAt(index - 1);
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      selectColourAt(0);
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      selectColourAt(COMING_SOON_PRODUCT_COLOURS.length - 1);
-    }
-  }
 
   return (
-    <section aria-labelledby="product-showcase-title" className="relative z-10 mx-auto max-w-5xl px-6 pb-24 sm:pb-32">
-      <h2 id="product-showcase-title" className="sr-only">Choose a PetTap colour</h2>
-      <div className="relative mx-auto flex aspect-square w-full max-w-[34rem] items-center justify-center rounded-[44px] border border-white/80 bg-white/75 shadow-[0_30px_90px_rgba(17,17,17,0.08)] sm:rounded-[52px]">
-        <div className="absolute inset-12 rounded-full bg-neutral-950/[0.035] blur-3xl" />
-        <div className="relative size-full" aria-live="polite">
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={selectedColour.id}
-              className="pointer-events-none absolute inset-0 flex items-center justify-center"
-              initial={reducedMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={crossfadeTransition}
-            >
-              <Image
-                src={selectedColour.image}
-                alt={`${selectedColour.name} PetTap NFC pet tag`}
-                width={460}
-                height={460}
-                priority
-                sizes="(max-width: 640px) 82vw, 460px"
-                className={cn(
-                  "w-[82%] drop-shadow-[0_28px_30px_rgba(17,17,17,0.24)]",
-                  selectedColour.imageClassName,
-                )}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
+    <section id="product" aria-labelledby="product-showcase-title" className={`relative z-10 scroll-mt-8 overflow-hidden bg-[#f8f8f6] px-6 ${spacing.sectionY}`}>
+      <div className="relative mx-auto max-w-6xl lg:px-8">
+        <motion.div initial={reducedMotion ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: reducedMotion ? 0 : 0.55, ease: premiumEase }}>
+          <SectionHeader align="center" className="max-w-2xl" eyebrow="Essential Collection" id="product-showcase-title" title="Personalised from every angle" description="Choose the shape, size, colours and name that make your Essential PetTap truly theirs." />
+        </motion.div>
 
-      <div className="mt-9 text-center">
-        <div role="radiogroup" aria-label="Choose your colour" className="flex items-center justify-center gap-4">
-          {COMING_SOON_PRODUCT_COLOURS.map((colour, index) => {
-            const selected = colour.id === selectedColour.id;
-
-            return (
-              <button
-                key={colour.id}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                aria-label={colour.name}
-                onClick={() => setSelectedColour(colour)}
-                onKeyDown={(event) => handleColourKeyDown(event, index)}
-                tabIndex={selected ? 0 : -1}
-                className={cn(
-                  "group relative flex size-11 items-center justify-center rounded-full transition duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-950/15 motion-reduce:transition-none",
-                  selected ? "ring-1 ring-neutral-950 ring-offset-4" : "ring-1 ring-black/[0.10] ring-offset-2",
-                )}
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-8 rounded-full border border-black/[0.10] shadow-inner"
-                  style={{ backgroundColor: colour.swatch }}
-                />
-                <span className="sr-only">{selected ? `${colour.name}, selected` : colour.name}</span>
-              </button>
-            );
-          })}
+        <div className="mt-14 grid items-start gap-8 lg:mt-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(22rem,0.75fr)] lg:gap-12">
+          <motion.div initial={reducedMotion ? false : { opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: reducedMotion ? 0 : motionTokens.duration.reveal, ease: premiumEase }}>
+            <ProductPreview name={name} shape={shape} primaryColour={primaryColour} accentColour={accentColour} size={size} side={side} />
+            <p className="mt-5 text-center text-xs leading-5 text-neutral-500">A visual demonstration of your PetTap. Choices here stay on this page.</p>
+          </motion.div>
+          <PersonalisationControls name={name} shape={shape} primaryColour={primaryColour} accentColour={accentColour} size={size} side={side} onNameChange={setName} onShapeChange={setShape} onPrimaryColourChange={setPrimaryColour} onAccentColourChange={setAccentColour} onSizeChange={setSize} onSideChange={setSide} />
         </div>
-        <p className="mt-5 text-sm font-medium text-neutral-600">Choose your colour</p>
-        <p className="mx-auto mt-3 max-w-sm text-xs leading-5 text-neutral-500">Works with most modern iPhone and Android NFC smartphones. No app required.</p>
+
+        <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {productFeatures.map(({ title, description, icon: Icon }) => <Card key={title} variant="outlined" className="rounded-2xl bg-white/70 p-4"><Icon className="size-4 text-neutral-900" aria-hidden="true" /><p className="mt-4 text-sm font-semibold text-neutral-900">{title}</p><p className="mt-1 text-xs leading-5 text-neutral-600">{description}</p></Card>)}
+        </div>
+
+        <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link href="/studio?collection=essential" className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-neutral-950 px-6 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(17,17,17,0.13)] transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-950/15 motion-reduce:transition-none">Start personalising</Link>
+          <a href="#collections" className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-black/[0.09] bg-white/80 px-6 text-sm font-semibold text-neutral-800 transition duration-300 hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-950/15 motion-reduce:transition-none">View all collections</a>
+        </div>
       </div>
     </section>
   );

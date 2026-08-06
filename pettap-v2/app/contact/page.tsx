@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import LaunchFooter from "@/components/coming-soon/LaunchFooter";
 import LaunchNavigation from "@/components/coming-soon/LaunchNavigation";
 import Container from "@/components/layout/Container";
 import { launchConfig } from "@/lib/launch/config";
 
-export const metadata: Metadata = { title: "Contact", description: "Contact the PetTap team." };
+export const metadata: Metadata = { title: "Contact", description: "Contact the PetTap team.", alternates: { canonical: "/contact" } };
 
 export default function ContactPage() {
-  if (!launchConfig.contactEmail) redirect("/");
-
   return (
     <>
       <LaunchNavigation />

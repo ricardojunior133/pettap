@@ -5,6 +5,8 @@ import { Menu, X } from "lucide-react";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { useState } from "react";
 
+import { PublicAccountActions } from "@/components/auth/PublicAccountActions";
+
 const links = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#tags", label: "PetTap Essential" },
@@ -12,7 +14,7 @@ const links = [
   { href: "/#faq", label: "FAQ" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -23,9 +25,10 @@ export default function Navbar() {
       <div className="flex h-16 items-center justify-between gap-4">
         <Link href="/" className="text-lg font-semibold tracking-[-0.04em] text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-4">PetTap</Link>
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Main navigation">{links.map((link) => <a key={link.href} href={link.href} className="text-sm font-medium text-neutral-600 transition hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-4">{link.label}</a>)}</nav>
-        <div className="flex items-center gap-2"><Link href="/studio" className="hidden rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neutral-950/15 sm:inline-flex">Personalise your tag</Link><button type="button" className="inline-flex size-10 items-center justify-center rounded-xl text-neutral-800 transition hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 lg:hidden" onClick={() => setOpen(!open)} aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open}>{open ? <X className="size-5" /> : <Menu className="size-5" />}</button></div>
+        <div className="hidden items-center gap-2 sm:flex"><PublicAccountActions isAuthenticated={isAuthenticated} /></div>
+        <div className="flex items-center gap-2 sm:hidden"><Link href={isAuthenticated ? "/dashboard" : "/register"} className="inline-flex min-h-10 items-center rounded-xl bg-neutral-950 px-3 text-sm font-semibold text-white transition hover:bg-neutral-800">{isAuthenticated ? "Dashboard" : "Create account"}</Link><button type="button" className="inline-flex size-10 items-center justify-center rounded-xl text-neutral-800 transition hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950" onClick={() => setOpen(!open)} aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open}>{open ? <X className="size-5" /> : <Menu className="size-5" />}</button></div>
       </div>
-      {open && <nav className="border-t border-black/[0.06] py-3 lg:hidden" aria-label="Mobile navigation">{links.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950">{link.label}</a>)}<Link href="/studio" onClick={() => setOpen(false)} className="mt-1 block rounded-xl bg-neutral-950 px-3 py-3 text-sm font-semibold text-white">Personalise your tag</Link></nav>}
+      {open ? <nav className="border-t border-black/[0.06] py-3 sm:hidden" aria-label="Mobile navigation">{links.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950">{link.label}</a>)}<div className="mt-2 grid gap-2 border-t border-black/[0.06] pt-3"><PublicAccountActions isAuthenticated={isAuthenticated} compact /></div></nav> : null}
     </div>
   </motion.header>;
 }

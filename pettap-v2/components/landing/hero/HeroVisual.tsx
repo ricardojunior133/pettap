@@ -62,7 +62,7 @@ export default function HeroVisual({ compact = false }: HeroVisualProps) {
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       >
         <Image
-          src="/images/hero/golden.png"
+          src="/images/hero/golden.webp"
           alt="Golden Retriever wearing a PetTap tag on its collar"
           width={760}
           height={1140}
@@ -124,7 +124,7 @@ export default function HeroVisual({ compact = false }: HeroVisualProps) {
 
       <div className={`absolute z-40 ${compact ? "bottom-[2%] left-[12%] w-[34%]" : "bottom-[2%] left-[27%] w-[30%]"}`}>
         <Image
-          src="/images/hero/cat.png"
+          src="/images/hero/cat.webp"
           alt=""
           width={260}
           height={220}
@@ -136,7 +136,7 @@ export default function HeroVisual({ compact = false }: HeroVisualProps) {
 
       <div className={`absolute z-40 ${compact ? "bottom-[2%] right-[1%] w-[23%]" : "bottom-[2%] right-[1%] w-[24%]"}`}>
         <Image
-          src="/images/hero/pug.png"
+          src="/images/hero/pug.webp"
           alt=""
           width={180}
           height={270}

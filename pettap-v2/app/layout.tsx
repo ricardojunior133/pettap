@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
+import { siteConfig } from "@/lib/config/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pettap.co.uk"),
+  metadataBase: new URL(siteConfig.url),
 
   title: {
     default: "PetTap",
     template: "%s | PetTap",
   },
 
-  description:
-    "Beautiful NFC pet tags that help lost pets find their way home in seconds.",
+  description: siteConfig.description,
 
   keywords: [
     "NFC Pet Tag",
@@ -32,20 +26,20 @@ export const metadata: Metadata = {
 
   authors: [
     {
-      name: "PetTap",
+      name: siteConfig.name,
     },
   ],
 
-  creator: "PetTap",
+  creator: siteConfig.name,
 
-  applicationName: "PetTap",
+  applicationName: siteConfig.name,
 
   alternates: {
     canonical: "/",
   },
 
   openGraph: {
-    title: "PetTap",
+    title: siteConfig.name,
 
     description:
       "Beautiful NFC pet tags that help reunite lost pets with their families.",
@@ -54,7 +48,9 @@ export const metadata: Metadata = {
 
     locale: "en_GB",
 
-    siteName: "PetTap",
+    siteName: siteConfig.name,
+    url: siteConfig.url,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "PetTap premium NFC pet tags" }],
 
   },
 
@@ -65,6 +61,7 @@ export const metadata: Metadata = {
 
     description:
       "Beautiful NFC pet tags that help lost pets find their way home.",
+    images: ["/opengraph-image"],
 
   },
 
@@ -80,8 +77,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+      <html lang="en">
       <body className="min-h-screen bg-white text-[#111111] antialiased">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: siteConfig.name, url: siteConfig.url, email: siteConfig.contactEmail, description: siteConfig.description }) }} />
         {children}
       </body>
     </html>
