@@ -10,6 +10,10 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        neutral: "border border-black/[0.08] bg-white text-neutral-600 [a]:hover:bg-neutral-50",
+        success: "bg-emerald-50 text-emerald-800 [a]:hover:bg-emerald-100",
+        seasonal: "bg-emerald-50 text-emerald-800 [a]:hover:bg-emerald-100",
+        exclusive: "bg-neutral-950 text-white [a]:hover:bg-neutral-800",
         secondary:
           "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
         destructive:
