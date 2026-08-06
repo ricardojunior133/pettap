@@ -1,17 +1,27 @@
 # Route Access Policy
 
-## Public during Coming Soon
+## Coming Soon production mode
 
-`/`, `/contact`, `/privacy`, `/terms`, `/robots.txt`, `/sitemap.xml` and `/opengraph-image` are explicitly allowed by `proxy.ts`.
+With `PETTAP_COMING_SOON_MODE` enabled in production, `proxy.ts` allows these public routes:
 
-## Private during Coming Soon
+- `/`
+- `/contact`
+- `/privacy`
+- `/terms`
+- `/shipping`
+- `/returns`
+- `/robots.txt`
+- `/sitemap.xml`
+- `/opengraph-image`
 
-All other routes redirect to `/` in production, including `/dashboard`, `/activate`, `/register`, `/login`, `/studio`, `/pet/*`, `/checkout/*`, `/scan`, `/help`, `/preview`, `/shipping` and `/returns`.
+Unknown routes are allowed to reach `app/not-found.tsx`, so visitors receive a real 404 instead of silently returning to Home.
 
-## Development-only access
+## Private routes
 
-The private route architecture is available locally while `PETTAP_COMING_SOON_MODE` is not active in production. This is for engineering validation only; it is not a public preview mechanism.
+Known private application prefixes redirect to `/` while Coming Soon mode is active: `/admin`, `/dashboard`, `/activate`, `/auth`, `/checkout`, `/help`, `/login`, `/pet`, `/pets`, `/preview`, `/register`, `/scan` and `/studio`.
 
-## Future activation condition
+The proxy is a launch gate, not the only security boundary. Server Actions and services continue to authenticate and authorize every private mutation.
 
-Private routes may be opened only after authentication, server-side authorization, database repositories, tag validation, privacy controls and a dedicated launch review are complete.
+## Restoring the full public application
+
+Set `PETTAP_COMING_SOON_MODE=false` only after platform launch review. The dashboard still requires a session and auth pages continue to redirect signed-in users appropriately.

@@ -1,3 +1,5 @@
 # Storage
 
-Create private buckets `pet-images`, `avatars` and `future-tag-assets`. Accept JPEG, PNG and WebP only, validate size server-side before signing uploads, and store object paths rather than public URLs. Generate signed URLs only after ownership authorization. Future image processing should run outside the request path.
+Pet photos use a private Supabase Storage bucket and authenticated, server-side signed URLs. The detailed policy, ownership, processing, and operational guidance lives in [Private Pet Photo Storage](./security/storage.md).
+
+Avatars and tag assets remain out of scope. Public URLs, browser-controlled object paths, and anonymous bucket access must not be introduced.
