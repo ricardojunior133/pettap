@@ -1,0 +1,6 @@
+import "server-only";
+import { desc, eq } from "drizzle-orm";
+import { notifications, settings } from "@/db/schema";
+import { createDatabaseClient } from "@/lib/backend/db";
+export type NotificationRecord = { id: string; channel: string; payload: unknown; createdAt: Date };
+export class NotificationRepository { async list(accountId: string, limit = 20): Promise<NotificationRecord[]> { const db = createDatabaseClient(); return db.select({ id: notifications.id, channel: notifications.channel, payload: notifications.payload, createdAt: notifications.createdAt }).from(notifications).where(eq(notifications.accountId, accountId)).orderBy(desc(notifications.createdAt)).limit(Math.min(Math.max(limit, 1), 50)); } async create(accountId: string, channel: string, payload: object) { const db = createDatabaseClient(); await db.insert(notifications).values({ accountId, channel, payload }); } async getPreferences(accountId: string) { const db=createDatabaseClient(); const [row]=await db.select({payload:settings.payload}).from(settings).where(eq(settings.accountId,accountId)).limit(1); return row?.payload ?? null; } async savePreferences(accountId:string,payload:object) { const db=createDatabaseClient(); await db.insert(settings).values({accountId,payload}).onConflictDoUpdate({target:settings.accountId,set:{payload,updatedAt:new Date()}}); } }

@@ -1,0 +1,1 @@
+export type SendEmailInput={to:string;subject:string;html:string;text:string;replyTo?:string}; export type SendEmailResult={success:true;messageId?:string}|{success:false;error:"provider_not_configured"|"invalid_recipient"|"delivery_failed"}; export interface EmailProvider{send(input:SendEmailInput):Promise<SendEmailResult>}

@@ -1,0 +1,3 @@
+export default function TrackingLoading() {
+  return <main className="min-h-screen bg-[#f8f8f6] px-5 py-10 sm:px-8 sm:py-16"><div className="mx-auto max-w-5xl animate-pulse"><div className="h-3 w-36 rounded bg-neutral-200" /><div className="mt-5 h-14 max-w-md rounded-2xl bg-neutral-200" /><div className="mt-10 h-52 rounded-[2rem] bg-white" /><div className="mt-6 grid gap-6 lg:grid-cols-[1.25fr_.75fr]"><div className="h-[520px] rounded-[2rem] bg-white" /><div className="space-y-6"><div className="h-56 rounded-[2rem] bg-white" /><div className="h-48 rounded-[2rem] bg-white" /></div></div></div></main>;
+}
