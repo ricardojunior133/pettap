@@ -50,7 +50,7 @@ describe("PetTap Home collection discovery", () => {
     expect(showcaseColourPairs.every((pair) => pair.primaryColour !== pair.accentColour)).toBe(true);
     expect(resolveStudioInitialConfiguration({ collection: "breed", model: "breed-pug", primaryColour: "#2563EB", accentColour: "#F5F5F5" })).toEqual({ collection: "breed", design: "breed-pug", colour: "#2563EB", lineColour: "#F5F5F5" });
     expect(resolveStudioInitialConfiguration({ collection: "seasonal", season: "halloween", model: "halloween-pumpkin", primaryColour: "not-a-colour" })).toMatchObject({ collection: "seasonal", season: "halloween", design: "halloween-pumpkin", colour: undefined });
-    expect(resolveStudioInitialConfiguration({ collection: "bad", model: "bad" })).toMatchObject({ collection: "essential", design: "circle" });
+    expect(resolveStudioInitialConfiguration({ collection: "bad", model: "bad" })).toMatchObject({ collection: "essential", design: "essential-round" });
   });
 
   it("keeps the Home customiser Essential-only with two colour systems", () => {

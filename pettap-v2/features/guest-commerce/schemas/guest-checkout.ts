@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { addressInputSchema } from "@/features/commerce/schemas/address";
 import { findCollectionModel, isCollectionId, isCollectionModel } from "@/lib/domain/collections";
+import { isCanonicalStudioModel } from "@/lib/studio/options";
 
 export const guestCheckoutConfigurationSchema = z.object({
   collection: z.string(),
@@ -15,20 +16,23 @@ export const guestCheckoutConfigurationSchema = z.object({
   finish: z.enum(["matte", "gloss"]),
   petName: z.string().trim().optional().default(""),
 }).strict().superRefine((value, context) => {
-  if (!isCollectionId(value.collection)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["collection"], message: "Unknown collection." });
-  if (!isCollectionModel(value.collection, value.shape)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["shape"], message: "This model is not available in the selected collection." });
+  const canonicalStudioModel = isCanonicalStudioModel(value.collection, value.shape);
+  if (!canonicalStudioModel && !isCollectionId(value.collection)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["collection"], message: "Unknown collection." });
+  if (!canonicalStudioModel && !isCollectionModel(value.collection, value.shape)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["shape"], message: "This model is not available in the selected collection." });
   if (value.collection === "seasonal" && !value.season) context.addIssue({ code: z.ZodIssueCode.custom, path: ["season"], message: "Choose a seasonal group." });
   if (value.collection === "seasonal" && value.season && findCollectionModel(value.collection, value.shape)?.season !== value.season) context.addIssue({ code: z.ZodIssueCode.custom, path: ["shape"], message: "This model is not available in the selected season." });
-  if (value.collection === "essential" && !value.petName) {
+  if ((value.collection === "essential" || canonicalStudioModel) && !value.petName) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["petName"], message: "A pet name is required for Essential tags." });
   }
-  if (value.collection === "essential" && value.petName.length > 12) {
+  if ((value.collection === "essential" || canonicalStudioModel) && value.petName.length > 12) {
     context.addIssue({ code: z.ZodIssueCode.too_big, maximum: 12, inclusive: true, origin: "string", path: ["petName"], message: "Pet names can contain up to 12 characters." });
   }
   if ((value.primaryColour ?? value.colour) === (value.accentColour ?? value.lineColour)) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["accentColour"], message: "Primary Colour and Accent Colour must be different." });
   }
-}).transform((value) => value.collection === "essential" ? { ...value, season: undefined } : value.collection === "seasonal" ? { ...value, petName: "" } : { ...value, petName: "", season: undefined });
+}).transform((value) => isCanonicalStudioModel(value.collection, value.shape) || value.collection === "essential"
+  ? { ...value, season: undefined }
+  : value.collection === "seasonal" ? { ...value, petName: "" } : { ...value, petName: "", season: undefined });
 
 const guestShippingAddressSchema = z.object({
   fullName: z.unknown(), company: z.unknown().optional(), addressLine1: z.unknown(), addressLine2: z.unknown().optional(),

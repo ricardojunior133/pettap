@@ -7,6 +7,7 @@ import { Check } from "lucide-react";
 import { useStudio } from "./StudioContext";
 import TagPreview from "./preview/TagPreview";
 import TagBackPreview from "./preview/TagBackPreview";
+import { studioPreviewDesignId } from "@/lib/studio/options";
 
 import StudioCard from "@/components/pettap/StudioCard";
 
@@ -29,6 +30,7 @@ const PRODUCT_BENEFITS = [
 
 export default function StudioPreview() {
   const { studio } = useStudio();
+  const previewDesign = studioPreviewDesignId(studio.design);
   const [activeView, setActiveView] = useState<ProductView>("front");
   const previewKey = `${studio.design}-${studio.size}-${studio.colour}-${studio.collection ?? "classic"}-${studio.material}-${studio.finish}-${activeView}`;
   const view = PRODUCT_VIEWS[activeView];
@@ -71,7 +73,7 @@ export default function StudioPreview() {
               className={`will-change-transform [transform-style:preserve-3d] ${studio.finish === "gloss" ? "drop-shadow-[0_14px_20px_rgba(255,255,255,0.35)]" : ""}`}
             >
               {activeView === "back" ? (
-                <TagBackPreview size={studio.size} colour={studio.colour} design={studio.design} />
+                <TagBackPreview size={studio.size} colour={studio.colour} design={previewDesign} />
               ) : activeView === "side" ? (
                 <SideProfile colour={studio.colour} size={studio.size} />
               ) : (
@@ -80,7 +82,7 @@ export default function StudioPreview() {
                   colour={studio.colour}
                   petName={studio.petName}
                   collection={studio.collection}
-                  design={studio.design}
+                  design={previewDesign}
                   engravingFont={studio.engravingFont}
                   engravingIcon={studio.engravingIcon}
                 />

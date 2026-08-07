@@ -1,5 +1,5 @@
 import { isCollectionId, type SeasonalId } from "@/lib/domain/collections";
-import { findStudioModel, isStudioCollectionId, modelsForStudioCollection, studioColours, studioLineColours } from "@/lib/studio/options";
+import { findStudioModel, isStudioCollectionId, modelsForStudioCollection, resolveStudioModelId, studioColours, studioLineColours } from "@/lib/studio/options";
 
 const collectionAliases = { cat: "cats", christmas: "seasonal", halloween: "seasonal", easter: "seasonal" } as const;
 const seasons = new Set<SeasonalId>(["christmas", "halloween", "easter"]);
@@ -21,7 +21,7 @@ export function resolveStudioInitialConfiguration(searchParams: StudioQuery) {
   const season = collection === "seasonal" ? requestedSeason ?? "christmas" : undefined;
   const models = modelsForStudioCollection(collection, season);
   const requestedModel = firstValue(searchParams.model);
-  const selectedModel = requestedModel ? findStudioModel(collection, requestedModel) : null;
+  const selectedModel = requestedModel ? findStudioModel(collection, resolveStudioModelId(requestedModel) ?? requestedModel) : null;
   const design = selectedModel && (collection !== "seasonal" || selectedModel.season === season) ? selectedModel.id : models[0]?.id;
   const primaryColour = studioColours.some((colour) => colour.value === firstValue(searchParams.primaryColour)) ? firstValue(searchParams.primaryColour) : undefined;
   const accentColour = studioLineColours.some((colour) => colour.value === firstValue(searchParams.accentColour)) ? firstValue(searchParams.accentColour) : undefined;

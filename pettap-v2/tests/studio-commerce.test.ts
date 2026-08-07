@@ -11,7 +11,7 @@ describe("Studio commerce preparation", () => {
   });
 
   it("creates a stable display SKU from the local configuration", () => {
-    expect(generateStudioSku({ ...initialStudioConfiguration, petName: "Charlie" })).toBe("PET-ESS-CIRCLE-CLA-MAT-BLK");
+    expect(generateStudioSku({ ...initialStudioConfiguration, design: "essential-round", petName: "Charlie" })).toBe("PET-ESS-ESSENTIAL-ROUND-CLA-MAT-BLK");
   });
 
   it("requires every commercial selection and a pet name", () => {
@@ -21,7 +21,7 @@ describe("Studio commerce preparation", () => {
   });
 
   it("requires a pet name for collection artwork too", () => {
-    const collectionConfiguration = { ...initialStudioConfiguration, collection: "breed", design: "breed-pug", petName: "" };
+    const collectionConfiguration = { ...initialStudioConfiguration, collection: "adventure", design: "adventure-compass", petName: "" };
     expect(isStudioConfigurationComplete(collectionConfiguration)).toBe(false);
     expect(isStudioConfigurationComplete({ ...collectionConfiguration, petName: "Poppy" })).toBe(true);
   });

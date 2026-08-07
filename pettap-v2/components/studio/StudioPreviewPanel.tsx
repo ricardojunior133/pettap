@@ -8,7 +8,7 @@ import Card from "@/components/ui/Card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { premiumEase } from "@/lib/theme/motion";
-import { designAllowsPetName, findStudioLabel, studioColours } from "@/lib/studio/options";
+import { designAllowsPetName, findStudioLabel, studioColours, studioPreviewDesignId } from "@/lib/studio/options";
 import { isEssentialShapeId } from "@/lib/studio/essential-shapes";
 
 import { useStudio } from "./StudioContext";
@@ -22,6 +22,7 @@ export default function StudioPreviewPanel() {
   const isBack = studio.frontBackView === "back";
   const colourName = findStudioLabel(studioColours, studio.colour, "Selected finish");
   const allowsPetName = designAllowsPetName(studio.collection, studio.design);
+  const previewDesign = studioPreviewDesignId(studio.design);
   const previousCollection = useRef(studio.collection);
   const [isCollectionChanging, setIsCollectionChanging] = useState(false);
 
@@ -40,7 +41,7 @@ export default function StudioPreviewPanel() {
       <div className="relative flex min-h-[260px] items-center justify-center sm:min-h-[340px]" role="img" aria-label={`${isBack ? "Back" : "Front"} view of a ${colourName} ${allowsPetName && studio.petName ? `PetTap for ${studio.petName}` : "PetTap"}`}>
         <AnimatePresence mode="wait" initial={false}>
           {isCollectionChanging ? <motion.div key="collection-skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex size-full items-center justify-center"><Skeleton className="size-48 rounded-full sm:size-60" /></motion.div> : <motion.div key={`${studio.design}-${studio.size}-${studio.colour}-${studio.lineColour}-${studio.petName}-${studio.frontBackView}`} initial={reducedMotion ? false : { opacity: 0, scale: 0.975, rotateY: isBack ? -82 : 82, rotateZ: -1.4, filter: "blur(2px)" }} animate={{ opacity: 1, scale: 1, rotateY: 0, rotateZ: 0, filter: "blur(0px)" }} exit={reducedMotion ? undefined : { opacity: 0, scale: 0.982, rotateY: isBack ? 82 : -82, rotateZ: 1.2, filter: "blur(2px)" }} whileHover={reducedMotion ? undefined : { scale: 1.03 }} transition={{ duration: reducedMotion ? 0 : 0.46, ease: premiumEase }} className="[perspective:1000px] [transform-style:preserve-3d] drop-shadow-[0_24px_26px_rgba(17,17,17,0.20)]">
-            {isBack ? <TagBackPreview colour={studio.colour} design={studio.design} size={studio.size} /> : isEssentialShapeId(studio.design) ? <TagPreview colour={studio.colour} lineColour={studio.lineColour} design={studio.design} engravingFont={studio.engravingFont} engravingIcon={studio.engravingIcon} petName={studio.petName} size={studio.size} collection={studio.collection} /> : <CollectionModelPreview accentColour={studio.lineColour} collection={studio.collection} design={studio.design} petName={studio.petName} primaryColour={studio.colour} size={studio.size} />}
+            {isBack ? <TagBackPreview colour={studio.colour} design={previewDesign} size={studio.size} /> : isEssentialShapeId(previewDesign) ? <TagPreview colour={studio.colour} lineColour={studio.lineColour} design={previewDesign} engravingFont={studio.engravingFont} engravingIcon={studio.engravingIcon} petName={studio.petName} size={studio.size} collection={studio.collection} /> : <CollectionModelPreview accentColour={studio.lineColour} collection={studio.collection} design={studio.design} petName={studio.petName} primaryColour={studio.colour} size={studio.size} />}
           </motion.div>}
         </AnimatePresence>
       </div>

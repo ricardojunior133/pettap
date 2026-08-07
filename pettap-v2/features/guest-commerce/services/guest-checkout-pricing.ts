@@ -1,6 +1,6 @@
 import { getPriceForSize } from "@/src/lib/domain/tag";
 
-import { studioColours } from "@/lib/studio/options";
+import { isCanonicalStudioModel, studioColours } from "@/lib/studio/options";
 
 import type { GuestCheckoutConfigurationInput } from "../schemas/guest-checkout";
 
@@ -8,7 +8,7 @@ export const GUEST_CHECKOUT_CURRENCY = "GBP" as const;
 export const GUEST_CHECKOUT_SHIPPING_MINOR = 299;
 
 const collectionSku: Record<string, string> = {
-  essential: "ESS", breed: "BRD", cats: "CAT", nature: "NAT", luxury: "LUX", kids: "KID", celebration: "CEL", seasonal: "SEA",
+  essential: "ESS", breed: "BRD", cats: "CAT", nature: "NAT", luxury: "LUX", kids: "KID", celebration: "CEL", seasonal: "SEA", bloom: "BLM", cosmic: "COS", adventure: "ADV", animal: "ANI",
 };
 const sizeSku: Record<GuestCheckoutConfigurationInput["size"], string> = { petite: "PET", classic: "CLA", explorer: "EXP" };
 const finishSku: Record<GuestCheckoutConfigurationInput["finish"], string> = { matte: "MAT", gloss: "GLS" };
@@ -45,7 +45,7 @@ export function calculateGuestCheckoutConfiguration(input: GuestCheckoutConfigur
     ...input,
     primaryColour: input.primaryColour ?? input.colour,
     accentColour: input.accentColour ?? input.lineColour,
-    ...(input.collection === "essential" ? { petName: input.petName.trim() } : { petName: undefined }),
+    ...(input.collection === "essential" || isCanonicalStudioModel(input.collection, input.shape) ? { petName: input.petName.trim() } : { petName: undefined }),
     sku: ["PET", collectionSku[input.collection], input.shape.toUpperCase(), sizeSku[input.size], finishSku[input.finish], colour.sku, input.lineColour.toUpperCase()].join("-"),
     unitAmountMinor,
     quantity: 1,

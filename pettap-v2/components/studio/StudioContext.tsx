@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, useReducer, type ReactNode } from "react";
 
 import { initialStudioConfiguration } from "@/lib/studio/defaults";
-import { modelsForStudioCollection } from "@/lib/studio/options";
+import { modelsForStudioCollection, resolveStudioModelId } from "@/lib/studio/options";
 import { canContinueStudio, studioReducer } from "@/lib/studio/state";
 import type { StudioConfiguration, StudioStep, StudioView } from "@/lib/studio/types";
 import type { PetTagConfiguration } from "@/types/tag";
@@ -85,7 +85,7 @@ export function createInitialStudioConfiguration(initialConfiguration?: StudioIn
     // catalogue collection (for example Bloom's `nature-*` assets), but the
     // visual flow and URL must continue to represent the selected Studio card.
     collection: initialConfiguration?.collection ?? null,
-    design: initialConfiguration?.design ?? firstModel.id,
+    design: resolveStudioModelId(initialConfiguration?.design) ?? initialConfiguration?.design ?? firstModel.id,
     colour: initialConfiguration?.colour ?? initialStudioConfiguration.colour,
     lineColour: initialConfiguration?.lineColour ?? initialStudioConfiguration.lineColour,
     season: initialConfiguration?.collection === "seasonal" ? initialConfiguration.season ?? firstModel.season : undefined,
