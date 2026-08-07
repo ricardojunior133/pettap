@@ -82,7 +82,7 @@ describe("guest checkout server-side calculation", () => {
     expect(new Set(ESSENTIAL_SHAPES.map((shape) => shape.id)).size).toBe(20);
     expect(studioShapes.filter((shape) => shape.collection === "essential").every((shape) => shape.supportsName)).toBe(true);
     expect(collectionAllowsPetName("essential")).toBe(true);
-    expect(collectionAllowsPetName("breed")).toBe(false);
+    expect(collectionAllowsPetName("breed")).toBe(true);
 
     const collection = createGuestCheckoutAttemptSchema.parse({ ...validInput, configuration: { ...validInput.configuration, collection: "breed", shape: "breed-pug", petName: "Must not persist" } });
     const calculated = calculateGuestCheckoutConfiguration(collection.configuration);

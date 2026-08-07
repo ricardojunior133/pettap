@@ -88,8 +88,10 @@ export function modelsForStudioCollection(collection: string | null, season?: Se
   return collection === "seasonal" ? modelsForSeason(season) : modelsForCollection(collection);
 }
 
-export function collectionAllowsPetName(collection: string | null) {
-  return collection === "essential";
+/** Every curated Studio collection accepts a pet name. */
+export function collectionAllowsPetName(_collection: string | null) {
+  void _collection;
+  return true;
 }
 
 /** Every Studio model supports a pet name. This must not depend on collection or model IDs. */
