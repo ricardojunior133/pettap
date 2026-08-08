@@ -22,8 +22,10 @@ export interface StudioModel {
   artwork: string;
   /** Stable future product-render path. */
   productImage: string;
-  /** Existing legacy render retained only as a visual fallback. */
+  /** Canonical approved render used by the Studio in the normal path. */
   image: string;
+  /** Existing collection card retained only if the canonical render fails to load. */
+  fallbackImage: string;
   supportsPersonalisation: true;
   supportsName: true;
   supportsPrimaryColour: true;
@@ -39,13 +41,19 @@ export interface StudioModel {
 const allSizes = ["petite", "classic", "explorer"] as const;
 const allColours = ["black", "white", "blue", "green", "purple", "pink", "orange", "red"] as const;
 
-function studioModel(collection: StudioCollectionId, slug: string, name: string, fallbackImage: string, order: number): StudioModel {
+const collectionFallbackImages: Record<StudioCollectionId, string> = {
+  essential: "/images/collections/cards/essential.webp", nature: "/images/collections/cards/nature.webp", bloom: "/images/collections/cards/celebration.webp",
+  cosmic: "/images/collections/cards/kids.webp", adventure: "/images/collections/cards/breed.webp", animal: "/images/collections/cards/cat.webp",
+};
+
+function studioModel(collection: StudioCollectionId, slug: string, name: string, order: number): StudioModel {
   const id = `${collection}-${slug}`;
   return {
     id, slug, name, collection,
     artwork: `/studio/models/${collection}/${slug}.svg`,
     productImage: `/studio/models/${collection}/${slug}.png`,
-    image: fallbackImage,
+    image: `/studio/models/${collection}/${slug}.png`,
+    fallbackImage: collectionFallbackImages[collection],
     supportsPersonalisation: true, supportsName: true, supportsPrimaryColour: true, supportsAccentColour: true, supportsSize: true, supportsFinish: true,
     availableSizes: allSizes, availableColours: allColours, order,
   };
@@ -53,45 +61,18 @@ function studioModel(collection: StudioCollectionId, slug: string, name: string,
 
 /** The sole active Studio catalogue. IDs are canonical commerce-facing identifiers. */
 export const studioModels: readonly StudioModel[] = [
-  studioModel("essential", "round", "Round", "/images/collections/essential/circle.png", 1),
-  studioModel("essential", "bone", "Bone", "/images/collections/essential/bone.png", 2),
-  studioModel("essential", "heart", "Heart", "/images/collections/essential/heart.png", 3),
-  studioModel("essential", "shield", "Shield", "/images/collections/essential/shield.png", 4),
-  studioModel("essential", "hexagon", "Hexagon", "/images/collections/essential/hexagon.png", 5),
-  studioModel("nature", "tree-of-life", "Tree of Life", "/images/collections/nature/tree.png", 1),
-  studioModel("nature", "forest", "Forest", "/images/collections/nature/forest.png", 2),
-  studioModel("nature", "mountain", "Mountain", "/images/collections/nature/mountain.png", 3),
-  studioModel("nature", "bamboo", "Bamboo", "/images/collections/nature/river.png", 4),
-  studioModel("nature", "wave-circle", "Wave Circle", "/images/collections/nature/wave.png", 5),
-  studioModel("bloom", "lotus", "Lotus Flower", "/images/collections/nature/lotus.png", 1),
-  studioModel("bloom", "sunflower", "Sunflower", "/images/collections/nature/blossom.png", 2),
-  studioModel("bloom", "daisy", "Daisy Flower", "/images/collections/nature/leaf.png", 3),
-  studioModel("bloom", "rose", "Rose Outline", "/images/collections/nature/sun.png", 4),
-  studioModel("bloom", "clover", "Clover", "/images/collections/nature/cactus.png", 5),
-  studioModel("cosmic", "crescent-moon", "Crescent Moon", "/images/collections/kids/rocket.png", 1),
-  studioModel("cosmic", "planet", "Planet", "/images/collections/kids/star.png", 2),
-  studioModel("cosmic", "star", "Star Outline", "/images/collections/kids/cloud.png", 3),
-  studioModel("cosmic", "starry-sky", "Starry Sky", "/images/collections/kids/rainbow.png", 4),
-  studioModel("cosmic", "comet", "Comet", "/images/collections/kids/unicorn.png", 5),
-  studioModel("adventure", "compass", "Compass", "/images/collections/breed/labrador.png", 1),
-  studioModel("adventure", "anchor-shield", "Anchor Shield", "/images/collections/breed/golden-retriever.png", 2),
-  studioModel("adventure", "tent", "Tent", "/images/collections/breed/border-collie.png", 3),
-  studioModel("adventure", "sunrise-mountains", "Sunrise Mountains", "/images/collections/breed/dachshund.png", 4),
-  studioModel("adventure", "paper-boat", "Paper Boat", "/images/collections/breed/cocker-spaniel.png", 5),
-  studioModel("animal", "puppy-face", "Puppy Face", "/images/collections/cats/bengal.png", 1),
-  studioModel("animal", "kitty-face", "Kitty Face", "/images/collections/cats/maine-coon.png", 2),
-  studioModel("animal", "butterfly", "Butterfly", "/images/collections/cats/ragdoll.png", 3),
-  studioModel("animal", "whale", "Whale", "/images/collections/cats/siamese.png", 4),
-  studioModel("animal", "bee", "Bee", "/images/collections/cats/british-shorthair.png", 5),
+  studioModel("essential", "round", "Round", 1), studioModel("essential", "bone", "Bone", 2), studioModel("essential", "heart", "Heart", 3), studioModel("essential", "shield", "Shield", 4), studioModel("essential", "hexagon", "Hexagon", 5),
+  studioModel("nature", "tree-of-life", "Tree of Life", 1), studioModel("nature", "forest", "Forest", 2), studioModel("nature", "mountain", "Mountain", 3), studioModel("nature", "bamboo", "Bamboo", 4), studioModel("nature", "wave-circle", "Wave Circle", 5),
+  studioModel("bloom", "lotus", "Lotus Flower", 1), studioModel("bloom", "sunflower", "Sunflower", 2), studioModel("bloom", "daisy", "Daisy Flower", 3), studioModel("bloom", "rose", "Rose Outline", 4), studioModel("bloom", "clover", "Clover", 5),
+  studioModel("cosmic", "crescent-moon", "Crescent Moon", 1), studioModel("cosmic", "saturn", "Saturn", 2), studioModel("cosmic", "stars", "Stars", 3), studioModel("cosmic", "rocket", "Rocket", 4), studioModel("cosmic", "comet", "Comet", 5),
+  studioModel("adventure", "compass", "Compass", 1), studioModel("adventure", "trail-sign", "Trail Sign", 2), studioModel("adventure", "peak", "Peak", 3), studioModel("adventure", "campfire", "Campfire", 4), studioModel("adventure", "paw-print", "Paw Print", 5),
+  studioModel("animal", "dog-face", "Dog Face", 1), studioModel("animal", "cat-face", "Cat Face", 2), studioModel("animal", "pug-face", "Pug Face", 3), studioModel("animal", "french-bulldog", "French Bulldog", 4), studioModel("animal", "paw-heart", "Paw Heart", 5),
 ];
 
 export const legacyStudioModelAliases: Readonly<Record<string, StudioModel["id"]>> = {
   circle: "essential-round", bone: "essential-bone", heart: "essential-heart", shield: "essential-shield", hexagon: "essential-hexagon",
-  "nature-tree": "nature-tree-of-life", "nature-forest": "nature-forest", "nature-mountain": "nature-mountain", "nature-river": "nature-bamboo", "nature-wave": "nature-wave-circle",
-  "nature-lotus": "bloom-lotus", "nature-blossom": "bloom-sunflower", "nature-leaf": "bloom-daisy", "nature-sun": "bloom-rose", "nature-cactus": "bloom-clover",
-  "kids-rocket": "cosmic-crescent-moon", "kids-star": "cosmic-planet", "kids-cloud": "cosmic-star", "kids-rainbow": "cosmic-starry-sky", "kids-unicorn": "cosmic-comet",
-  "breed-labrador": "adventure-compass", "breed-golden-retriever": "adventure-anchor-shield", "breed-border-collie": "adventure-tent", "breed-dachshund": "adventure-sunrise-mountains", "breed-cocker-spaniel": "adventure-paper-boat",
-  "cats-bengal": "animal-puppy-face", "cats-maine-coon": "animal-kitty-face", "cats-ragdoll": "animal-butterfly", "cats-siamese": "animal-whale", "cats-british-shorthair": "animal-bee",
+  "nature-tree": "nature-tree-of-life", "nature-forest": "nature-forest", "nature-mountain": "nature-mountain", "nature-wave": "nature-wave-circle",
+  "nature-lotus": "bloom-lotus", "kids-star": "cosmic-stars", "kids-rocket": "cosmic-rocket",
 };
 
 /** Legacy name retained for existing Studio consumers; it now contains only the 30 active models. */

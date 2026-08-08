@@ -49,7 +49,7 @@ describe("public Studio state", () => {
   it("restores canonical URLs and normalises known legacy Studio URLs", () => {
     expect(resolveStudioInitialConfiguration({ collection: "bloom", model: "bloom-lotus" })).toMatchObject({ collection: "bloom", design: "bloom-lotus" });
     expect(resolveStudioInitialConfiguration({ collection: "bloom", model: "nature-lotus" })).toMatchObject({ collection: "bloom", design: "bloom-lotus" });
-    expect(createInitialStudioConfiguration({ collection: "animal", design: "cats-bengal", petName: "Nala" })).toMatchObject({ collection: "animal", design: "animal-puppy-face", petName: "Nala" });
+    expect(createInitialStudioConfiguration({ collection: "animal", design: "animal-dog-face", petName: "Nala" })).toMatchObject({ collection: "animal", design: "animal-dog-face", petName: "Nala" });
   });
 
   it("uses a safe collection-local fallback for invalid URLs", () => {

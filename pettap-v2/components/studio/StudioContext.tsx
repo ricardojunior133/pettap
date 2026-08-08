@@ -75,9 +75,14 @@ export function useStudio() {
 }
 
 export function createInitialStudioConfiguration(initialConfiguration?: StudioInitialConfiguration): StudioConfiguration {
-  const firstModel = initialConfiguration?.collection ? modelsForStudioCollection(initialConfiguration.collection, initialConfiguration.season)[0] : undefined;
+  const collection = initialConfiguration?.collection ?? null;
+  const firstModel = collection ? modelsForStudioCollection(collection, initialConfiguration?.season)[0] : undefined;
 
   if (!firstModel) return { ...initialStudioConfiguration };
+  const requestedDesign = resolveStudioModelId(initialConfiguration?.design) ?? initialConfiguration?.design;
+  const design = requestedDesign && modelsForStudioCollection(collection, initialConfiguration?.season).some((model) => model.id === requestedDesign)
+    ? requestedDesign
+    : firstModel.id;
 
   return {
     ...initialStudioConfiguration,
@@ -85,7 +90,7 @@ export function createInitialStudioConfiguration(initialConfiguration?: StudioIn
     // catalogue collection (for example Bloom's `nature-*` assets), but the
     // visual flow and URL must continue to represent the selected Studio card.
     collection: initialConfiguration?.collection ?? null,
-    design: resolveStudioModelId(initialConfiguration?.design) ?? initialConfiguration?.design ?? firstModel.id,
+    design,
     colour: initialConfiguration?.colour ?? initialStudioConfiguration.colour,
     lineColour: initialConfiguration?.lineColour ?? initialStudioConfiguration.lineColour,
     season: initialConfiguration?.collection === "seasonal" ? initialConfiguration.season ?? firstModel.season : undefined,
