@@ -2,7 +2,16 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { updateSupabaseSession } from "@/lib/backend/supabase/proxy";
 
-const isComingSoonLaunch = process.env.NODE_ENV === "production" && process.env.PETTAP_COMING_SOON_MODE !== "false";
+type LaunchEnvironment = Partial<Pick<NodeJS.ProcessEnv, "NODE_ENV" | "PETTAP_COMING_SOON_MODE" | "VERCEL_ENV">>;
+
+export function isComingSoonLaunch(environment: LaunchEnvironment = process.env) {
+  return environment.NODE_ENV === "production" && environment.PETTAP_COMING_SOON_MODE !== "false";
+}
+
+/** Studio is intentionally previewable on Vercel without widening the production allowlist. */
+export function isStudioPreviewRoute(pathname: string, environment: LaunchEnvironment = process.env) {
+  return environment.VERCEL_ENV === "preview" && (pathname === "/studio" || pathname.startsWith("/studio/"));
+}
 
 const publicPaths = new Set([
   "/",
@@ -40,7 +49,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (!isComingSoonLaunch || publicPaths.has(pathname)) return NextResponse.next();
+  if (!isComingSoonLaunch() || publicPaths.has(pathname) || isStudioPreviewRoute(pathname)) return NextResponse.next();
   return NextResponse.redirect(new URL("/", request.url));
 }
 
