@@ -21,11 +21,14 @@ describe("model-specific Studio previews", () => {
     expect(hasStudioPreviewDefinition("not-a-studio-model")).toBe(false);
   });
 
-  it("passes both selected colours and the pet name to a canonical front preview", () => {
+  it("renders a physical, recolourable canonical front preview with an integrated pet name", () => {
     const markup = renderToStaticMarkup(createElement(CollectionModelPreview, { accentColour: "#C99B45", collection: "cosmic", design: "cosmic-rocket", petName: "Charlie", primaryColour: "#2563EB", size: "classic" }));
     expect(markup).toContain('data-model-artwork="cosmic-rocket"');
     expect(markup).toContain('fill="#2563EB"');
     expect(markup).toContain('stroke="#C99B45"');
+    expect(markup).toContain('data-layer="extrusion"');
+    expect(markup).toContain('data-layer="petg-texture"');
+    expect(markup).toContain('data-pet-name="true"');
     expect(markup).toContain(">Charlie<");
   });
 

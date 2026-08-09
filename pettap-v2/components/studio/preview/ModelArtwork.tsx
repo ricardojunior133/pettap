@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 import { cn } from "@/lib/utils";
 
 type VectorModelDefinition = {
@@ -99,14 +101,37 @@ export function hasStudioPreviewDefinition(modelId: string) {
   return modelId in studioPreviewDefinitions;
 }
 
-export function ModelArtwork({ modelId, primaryColour, accentColour, className }: { modelId: string; primaryColour: string; accentColour: string; className?: string }) {
+export function ModelArtwork({ modelId, primaryColour, accentColour, petName = "", className }: { modelId: string; primaryColour: string; accentColour: string; petName?: string; className?: string }) {
   const definition = studioPreviewDefinitions[modelId];
+  const instanceId = useId().replace(/:/g, "");
   if (!definition) return null;
-  return <svg aria-label={`${definition.label} tag artwork`} className={cn("drop-shadow-[0_16px_18px_rgba(0,0,0,0.18)]", className)} data-model-artwork={modelId} viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-    <g data-layer="primary" fill={primaryColour}>{silhouettes[definition.silhouette]}</g>
-    <g data-layer="accent" fill="none" stroke={accentColour} strokeLinecap="round" strokeLinejoin="round" strokeWidth="12">
-      {silhouettes[definition.silhouette]}
-      <g data-model-relief="true" fill="none">{designFor(modelId)}</g>
+  const silhouette = silhouettes[definition.silhouette];
+  const artwork = designFor(modelId);
+  const nameFontSize = petName.length > 9 ? 22 : petName.length > 6 ? 26 : 31;
+  const clipPathId = `tag-clip-${instanceId}`;
+  const shadowId = `tag-shadow-${instanceId}`;
+
+  return <svg aria-label={`${definition.label} tag artwork`} className={cn("overflow-visible drop-shadow-[0_24px_22px_rgba(17,17,17,0.22)]", className)} data-model-artwork={modelId} viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id={clipPathId}>{silhouette}</clipPath>
+      <filter id={shadowId} x="-20%" y="-20%" width="140%" height="145%"><feDropShadow dx="0" dy="14" stdDeviation="10" floodColor="#111111" floodOpacity="0.3" /></filter>
+    </defs>
+    <g data-layer="extrusion" fill="#111111" opacity="0.3" transform="translate(0 13)">{silhouette}</g>
+    <g filter={`url(#${shadowId})`}>
+      <g data-layer="primary" fill={primaryColour} stroke="rgba(17,17,17,0.48)" strokeWidth="5">{silhouette}</g>
+      <g clipPath={`url(#${clipPathId})`} data-layer="petg-texture" fill="none" opacity="0.2" stroke="#ffffff" strokeWidth="2">
+        {Array.from({ length: 74 }, (_, index) => <path d={`M64 ${152 + index * 4.2}H448`} key={index} />)}
+      </g>
+      <g data-layer="rim" fill="none" opacity="0.28" stroke="#ffffff" strokeWidth="4">{silhouette}</g>
+      <g data-layer="relief-shadow" fill="none" opacity="0.32" stroke="#111111" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16" transform="translate(0 5)">{artwork}</g>
+      <g data-layer="accent" fill="none" stroke={accentColour} strokeLinecap="round" strokeLinejoin="round" strokeWidth="12">
+        <g data-model-relief="true">{artwork}</g>
+      </g>
+      <g data-layer="relief-highlight" fill="none" opacity="0.22" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" transform="translate(0 -1)">{artwork}</g>
+      {petName ? <g aria-label={`Personalised name ${petName}`} data-pet-name="true" textAnchor="middle">
+        <text fill="rgba(17,17,17,0.45)" fontSize={nameFontSize} fontWeight="800" letterSpacing="2.5" stroke={primaryColour} strokeWidth="8" x="256" y="389">{petName}</text>
+        <text fill={accentColour} fontSize={nameFontSize} fontWeight="800" letterSpacing="2.5" stroke="rgba(255,255,255,0.28)" strokeWidth="1" x="256" y="385">{petName}</text>
+      </g> : null}
     </g>
   </svg>;
 }

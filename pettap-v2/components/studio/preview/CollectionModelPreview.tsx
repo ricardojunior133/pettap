@@ -5,10 +5,13 @@ import { ModelArtwork } from "./ModelArtwork";
 
 export function CollectionModelPreview({ collection, design, size, primaryColour, accentColour, petName }: { collection: string | null; design: string; size: TagSize; primaryColour: string; accentColour: string; petName: string }) {
   const model = findStudioModel(collection, design);
-  const widthClass = { petite: "w-44", classic: "w-56", explorer: "w-72" }[size];
+  const widthClass = {
+    petite: "w-[min(58vw,15rem)] sm:w-[min(38vw,18rem)] xl:w-[min(22vw,18rem)]",
+    classic: "w-[min(70vw,18rem)] sm:w-[min(47vw,19rem)] xl:w-[min(27vw,22rem)]",
+    explorer: "w-[min(76vw,20rem)] sm:w-[min(50vw,21rem)] xl:w-[min(30vw,22.5rem)]",
+  }[size];
   if (!model) return null;
   return <div className={`relative ${widthClass}`}>
-    <ModelArtwork accentColour={accentColour} className="h-auto w-full" modelId={model.id} primaryColour={primaryColour} />
-    {petName ? <span className="pointer-events-none absolute inset-x-[20%] top-[65%] block truncate text-center text-[clamp(0.7rem,3.6vw,1.15rem)] font-semibold tracking-[0.08em] text-white [text-shadow:0_1px_5px_rgba(0,0,0,0.55)]">{petName}</span> : null}
+    <ModelArtwork accentColour={accentColour} className="h-auto w-full" modelId={model.id} petName={petName} primaryColour={primaryColour} />
   </div>;
 }
